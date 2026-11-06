@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>03 收藏</title><link rel="stylesheet" href="style.css">
+<style>.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}.fav{overflow:hidden;display:flex;flex-direction:column}.fav .pic{aspect-ratio:16/9}.fav .in{padding:8px 10px 10px;display:flex;flex-direction:column;gap:4px;flex:1}.fav .t{font-weight:600;line-height:1.4}.fav .n{margin:2px 0 0;padding:4px 8px;border-radius:4px;background:#FFF8EC;color:#5C3B0A;font-size:12px}.fav .when{margin-top:auto;font-size:11px;color:var(--muted)}</style></head>
+<body><div class="shell">
+<nav class="nav" aria-label="导航">
+  <div class="brand"><span class="logo">拾</span>拾闻</div>
+  <div class="nav-links">
+    <a href="01-today.html"><span>今日</span><span>9 未读</span></a>
+    <a href="02-all.html"><span>全部</span></a>
+    <a class="on" href="03-favorites.html"><span>收藏</span><span>32</span></a>
+    <a href="04-topics.html"><span>主题</span><span>3</span></a>
+    <a href="05-updates.html"><span>更新与记录</span></a>
+  </div>
+  <a class="status" href="05-updates.html"><b><span class="dot"></span>今天 08:12 已更新</b><span>Claude · 每天 08:00</span></a>
+</nav>
+<main class="main">
+  <div class="head"><h1>收藏</h1><span class="muted">32 条</span>
+    <div class="tools"><input class="input" placeholder="搜索标题、备注" style="width:180px"><select class="input"><option>按收藏时间</option><option>按发布时间</option></select><span class="chip on" style="border-radius:6px">卡片</span><span class="chip" style="border-radius:6px">列表</span><button class="btn">↻ 刷新</button></div>
+  </div>
+  <div class="chips"><span class="chip on">全部 32</span><span class="chip">AI 工具动态 19</span><span class="chip">新能源车价格 9</span><span class="chip">城市出行 4</span><span class="chip">有备注 7</span></div>
+  <div class="grid">
+    <article class="card fav"><div class="pic img-ph" style="background:#E3EEE6">配图</div><div class="in"><span class="tag" style="align-self:flex-start">AI 工具动态</span><span class="t">多款 AI 编程工具支持用一个链接打开项目并预填提示词</span><span class="small muted">开发者社区 · 11月6日</span><span class="when">收藏于 今天</span></div></article>
+    <article class="card fav"><div class="pic img-ph" style="font-size:28px;font-weight:700">个</div><div class="in"><span class="tag" style="align-self:flex-start">AI 工具动态</span><span class="t">把 agent 当员工用：每天早上的定时简报流程</span><span class="small muted">个人博客 · 11月4日</span><p class="n">备注：可以参考它的主题写法</p><span class="when">收藏于 11月5日</span></div></article>
+    <article class="card fav"><div class="pic img-ph" style="background:#E6E2F1">配图</div><div class="in"><span class="tag" style="align-self:flex-start">新能源车价格</span><span class="t">两款同级 SUV 本月优惠对比</span><div class="extra"><span>截止 <b>11/30</b></span></div><span class="small muted">汽车论坛 · 11月3日</span><p class="n">备注：周末去门店前再核对一次</p><span class="when">收藏于 11月3日</span></div></article>
+    <article class="card fav"><div class="pic img-ph" style="background:#DCE6F7">配图</div><div class="in"><span class="tag" style="align-self:flex-start">AI 工具动态</span><span class="t">几款 AI 助手的定时任务功能对比</span><span class="small muted">开发者社区 · 11月1日</span><span class="when">收藏于 11月2日</span></div></article>
+    <article class="card fav"><div class="pic img-ph" style="background:#DDEBF0">配图</div><div class="in"><span class="tag" style="align-self:flex-start">城市出行</span><span class="t">新线路开通后，换乘方案有哪些变化</span><span class="small muted">本地生活 · 10月30日</span><span class="when">收藏于 10月30日</span></div></article>
+    <article class="card fav"><div class="pic img-ph" style="background:#F3E8DA">配图</div><div class="in"><span class="tag" style="align-self:flex-start">新能源车价格</span><span class="t">[车型 B] 冬季续航实测</span><span class="small muted">汽车资讯 · 10月28日</span><p class="n">备注：和 [车型 A] 对比看</p><span class="when">收藏于 10月29日</span></div></article>
+  </div>
+  <p class="annot" style="margin:0;align-self:flex-start">点卡片打开阅读面板（同今日右侧）。没有配图时显示来源首字。</p>
+</main>
+</div></body></html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>08 车价主题 · 定制对比表</title><link rel="stylesheet" href="style.css">
+<style>th button{all:unset;cursor:pointer}th button:after{content:" ↕";color:#9AA1AD}tr.pick td{background:var(--accent-bg)}.num{text-align:right;font-variant-numeric:tabular-nums}</style></head>
+<body><div class="shell">
+<nav class="nav" aria-label="导航"><div class="brand"><span class="logo">拾</span>拾闻</div><div class="nav-links"><a class="on" href="01-today.html"><span>今日</span><span>9 未读</span></a><a href="02-all.html"><span>全部</span></a><a href="03-favorites.html"><span>收藏</span><span>32</span></a><a href="04-topics.html"><span>主题</span><span>3</span></a><a href="05-updates.html"><span>更新与记录</span></a></div><a class="status" href="05-updates.html"><b><span class="dot"></span>今天 08:12 已更新</b><span>Claude · 每天 08:00</span></a></nav>
+<main class="main">
+  <div class="head"><h1>11月6日 星期五</h1><span class="muted">新能源车价格 · 5 条</span><div class="tools"><button class="btn">↻ 刷新</button></div></div>
+  <div class="note"><b>改后：用户用「按你的想法改」对 AI 说"车价主题做成对比表"。</b>AI 在 app/views/ 新增"价格对比表"这种展示方式并登记，主题的展示方式改成它。通用部分不动，阅读面板、收藏和搜索照旧。</div>
+  <div class="chips"><span class="chip">全部 14</span><span class="chip">未读 9</span><span class="chip">AI 工具动态 6</span><span class="chip on">新能源车价格 5</span><span class="chip">城市出行 3</span></div>
+  <section class="card" style="overflow:hidden">
+    <div class="group-head"><strong>新能源车价格</strong><span>5 条 · 价格对比表</span></div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th><button>车型</button></th><th class="num"><button>现价</button></th><th class="num"><button>降价</button></th><th><button>优惠截止</button></th><th>消息</th><th>来源 · 时间</th><th></th></tr></thead>
+      <tbody>
+        <tr class="pick"><td><b>[车型 A]</b></td><td class="num">[价格 1]</td><td class="num" style="color:var(--ok);font-weight:600">[金额 1]</td><td>11/30 <span class="pill warn" style="font-size:11px">剩 24 天</span></td><td>本周起限时降价，起售价下调</td><td class="muted">汽车资讯 · 07:30</td><td style="color:var(--star)">★</td></tr>
+        <tr><td><b>[车型 B]</b></td><td class="num muted">—</td><td class="num" style="color:var(--ok);font-weight:600">[金额 2]</td><td>12/31</td><td>置换补贴延长到年底</td><td class="muted">汽车资讯 · 昨天</td><td></td></tr>
+        <tr><td><b>[车型 C]</b></td><td class="num muted">—</td><td class="num muted">—</td><td>11/30</td><td>两款同级 SUV 本月优惠对比</td><td class="muted">汽车论坛 · 06:55</td><td></td></tr>
+        <tr><td><b>[车型 D]</b></td><td class="num">[价格 2]</td><td class="num muted">—</td><td class="muted">—</td><td>新款上市，指导价公布</td><td class="muted">品牌官方 · 昨天</td><td></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+  <div class="split">
+    <div class="card pad" style="flex:1 1 320px">
+      <strong>[车型 A] 近 30 天</strong>
+      <p class="small muted" style="margin:4px 0 8px">由这个主题过去的内容汇总，点表格的行切换车型</p>
+      <div style="display:flex;flex-direction:column;gap:4px" class="small">
+        <div style="display:flex;justify-content:space-between"><span>10月12日</span><span>指导价公布</span><span class="num">[价格 0]</span></div>
+        <div style="display:flex;justify-content:space-between"><span>10月28日</span><span>金融贴息</span><span class="num">—</span></div>
+        <div style="display:flex;justify-content:space-between"><b>11月6日</b><b>限时降价</b><b class="num">[价格 1]</b></div>
+      </div>
+    </div>
+    <p class="annot" style="flex:1 1 320px;margin:0">这是第二层定制的示范，第一版不内置。表头可点击排序；点行打开阅读面板。"近 30 天"只读这个主题的历史内容，按 extra 里的"车型"汇总。如果 AI 判断需要把"现价"改成正式数字列来排序，就按设计文档 9.3 节的顺序改表结构。</p>
+  </div>
+</main>
+</div></body></html>

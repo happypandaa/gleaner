@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>05 更新与记录</title><link rel="stylesheet" href="style.css">
+<style>.stat{display:flex;flex-direction:column;gap:1px;min-width:170px}.ways{display:flex;flex-wrap:wrap;gap:10px}.way{flex:1 1 300px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}</style></head>
+<body><div class="shell">
+<nav class="nav" aria-label="导航">
+  <div class="brand"><span class="logo">拾</span>拾闻</div>
+  <div class="nav-links">
+    <a href="01-today.html"><span>今日</span><span>9 未读</span></a>
+    <a href="02-all.html"><span>全部</span></a>
+    <a href="03-favorites.html"><span>收藏</span><span>32</span></a>
+    <a href="04-topics.html"><span>主题</span><span>3</span></a>
+    <a class="on" href="05-updates.html"><span>更新与记录</span></a>
+  </div>
+  <a class="status" href="05-updates.html"><b><span class="dot"></span>今天 08:12 已更新</b><span>Claude · 每天 08:00</span></a>
+</nav>
+<main class="main"><div style="max-width:920px;display:flex;flex-direction:column;gap:10px">
+  <div class="head"><div><h1>更新与记录</h1><span class="muted">内容由你的 AI 在它自己的软件里更新，拾闻只显示状态和记录。</span></div><div class="tools"><button class="btn">↻ 刷新</button></div></div>
+
+  <section class="card pad" style="display:flex;flex-wrap:wrap;gap:16px">
+    <div class="stat"><span class="small muted">上次更新</span><strong>今天 08:12 · 完成</strong><span class="small muted">Claude · 新增 14 条</span></div>
+    <div class="stat"><span class="small muted">自动更新</span><strong>每天 08:00</strong><span class="small muted">由 Claude 的定时任务运行</span></div>
+    <div class="stat"><span class="small muted">配图</span><strong>保存在本机</strong><span class="small muted">只存缩略图</span></div>
+  </section>
+  <p class="annot" style="margin:0;align-self:flex-start">状态规则：没有记录→"还没有连接 AI"；running 不到 1 小时→"AI 正在更新…"，超过→"上次更新可能中断了"；26 小时内有 done/partial→绿点；超过 26 小时→橙点"已经 N 天没有更新，检查 AI 工具里的定时任务"。</p>
+
+  <section class="ways">
+    <div class="card way" style="border-color:#B9CBF0">
+      <div style="display:flex;align-items:center;gap:6px"><strong>每天自动更新</strong><span class="pill info" style="font-size:11px">推荐</span><span class="small" style="margin-left:auto;color:var(--ok)">已设置 · 每天 08:00</span></div>
+      <p style="margin:0;color:var(--text-3)">把下面的话粘贴给你的 AI 工具，它会马上更新一次，并建一个每天运行的定时任务。只需设置一次。</p>
+      <div style="display:flex;gap:6px;align-items:center"><label class="small" for="t">每天</label><select id="t" class="input"><option>08:00</option><option>07:00</option><option>12:00</option><option>20:00</option></select></div>
+      <pre class="prompt">请在这个文件夹里工作：/Users/galen/dev/panda-project/gleaner。先读其中的 AGENTS.md。然后：1. 马上按 AGENTS.md 更新一次简报，运行记录的 trigger 填 setup；2. 帮我建一个每天 08:00 运行的定时任务，工作目录设为这个文件夹，任务内容是"按 AGENTS.md 更新简报"，并把定时安排写进运行记录的 schedule。如果你不支持定时任务，直接告诉我。</pre>
+      <div style="display:flex;gap:6px"><button class="btn primary">复制提示词</button><button class="btn">复制文件夹路径</button></div>
+    </div>
+    <div class="card way">
+      <strong>现在手动更新一次</strong>
+      <p style="margin:0;color:var(--text-3)">也可以直接在 AI 工具里说"更新简报"。</p>
+      <pre class="prompt">请在 /Users/galen/dev/panda-project/gleaner 里按 AGENTS.md 更新一次简报。</pre>
+      <div style="display:flex;gap:6px"><button class="btn">复制提示词</button></div>
+    </div>
+  </section>
+  <p class="annot" style="margin:0;align-self:flex-start">拾闻不调起 AI，只显示提示词和复制按钮。文件夹路径来自 panda.context.get() 返回的 projectRoot。</p>
+
+  <section class="card" style="overflow:hidden">
+    <div style="display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line-soft)"><strong>运行记录</strong><span class="small muted">AI 每次运行都留一条</span></div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>时间</th><th>AI 工具</th><th>方式</th><th>结果</th><th>状态</th></tr></thead>
+      <tbody>
+        <tr><td>今天 08:12</td><td>Claude</td><td>定时</td><td>新增 14 条，跳过重复 5 条，配图 11 张</td><td><span class="pill ok">完成</span></td></tr>
+        <tr><td>昨天 08:10</td><td>Claude</td><td>定时</td><td>新增 13 条；处理请求 1 个</td><td><span class="pill ok">完成</span></td></tr>
+        <tr><td>11月4日 15:30</td><td>Claude</td><td>手动</td><td>新增 3 条</td><td><span class="pill ok">完成</span></td></tr>
+        <tr><td>11月4日 08:15</td><td>Claude</td><td>定时</td><td>新增 9 条；"城市出行"没找到新内容；2 张配图下载失败，用原图地址代替</td><td><span class="pill warn">部分完成</span></td></tr>
+        <tr><td>11月3日 19:40</td><td>Claude</td><td>设置</td><td>第一次运行，新增 12 条；已建每天 08:00 的定时任务</td><td><span class="pill ok">完成</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+</div></main>
+</div></body></html>

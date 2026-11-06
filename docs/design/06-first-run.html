@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>06 第一次打开</title><link rel="stylesheet" href="style.css">
+<style>.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}.step{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff}.num{flex:none;width:22px;height:22px;border-radius:11px;background:#EEF1F5;color:var(--text-3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}.num.done{background:var(--ok);color:#fff}.num.now{background:var(--accent);color:#fff}.step .b{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}</style></head>
+<body><div class="shell">
+<nav class="nav" aria-label="导航">
+  <div class="brand"><span class="logo">拾</span>拾闻</div>
+  <div class="nav-links">
+    <a class="on" href="06-first-run.html"><span>开始使用</span></a>
+    <a href="04-topics.html"><span>主题</span><span>1</span></a>
+    <a href="05-updates.html"><span>更新与记录</span></a>
+  </div>
+  <a class="status" href="05-updates.html"><b><span class="dot warn"></span>等待 AI 第一次运行…</b><span>完成后回到这里</span></a>
+</nav>
+<main class="main"><div style="max-width:760px;display:flex;flex-direction:column;gap:12px">
+  <div><h1 style="margin:0;font-size:20px">你的 AI 去收集，你在这里看</h1>
+  <p style="margin:4px 0 0;color:var(--text-3)">拾闻不自带 AI，也不自己上网。内容由你常用的 AI 工具收集并写进来；你在这里浏览、收藏、标记不感兴趣。简报和配图都留在这台电脑上，AI 下次会参考你的反馈。</p></div>
+  <ol class="steps">
+    <li class="step"><span class="num done">✓</span><div class="b"><strong>写一个主题</strong><span class="muted">已添加"AI 工具动态"。可以随时去"主题"里修改或再加。</span></div></li>
+    <li class="step"><span class="num now">2</span><div class="b">
+      <strong>连接你的 AI</strong>
+      <span class="muted">把下面的话粘贴到你的 AI 工具（Claude、Codex、WorkBuddy 等）并发送。它会马上更新一次，并建一个每天运行的定时任务。</span>
+      <div style="display:flex;gap:6px;align-items:center"><label class="small" for="t">每天</label><select id="t" class="input"><option>08:00</option></select></div>
+      <pre class="prompt">请在这个文件夹里工作：/Users/galen/dev/panda-project/gleaner。先读其中的 AGENTS.md。然后：1. 马上按 AGENTS.md 更新一次简报，运行记录的 trigger 填 setup；2. 帮我建一个每天 08:00 运行的定时任务……（全文同"更新与记录"）</pre>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn primary">复制提示词</button><button class="btn">复制文件夹路径</button></div>
+      <span class="small" style="color:var(--warn)">已复制。在 AI 工具里发送后回到这里，拾闻会自动发现第一次运行。</span>
+    </div></li>
+    <li class="step"><span class="num">3</span><div class="b"><strong>看第一期</strong><span class="muted">发现 AI 的第一次运行后，这里显示"已连接 · Claude · 每天 08:00"和"去看今日简报"。</span></div></li>
+  </ol>
+  <p class="annot" style="margin:0">三步完成前，这个页面替代"今日"。第 2 步复制后进入等待状态，拾闻刷新时检查 runs 表里是否出现 trigger = setup 的记录。完成后不再显示，可在"更新与记录"里重新查看提示词。</p>
+</div></main>
+</div></body></html>

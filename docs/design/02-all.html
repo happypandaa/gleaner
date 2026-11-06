@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>02 全部</title><link rel="stylesheet" href="style.css">
+<style>mark{background:#FFE9A8;color:inherit;border-radius:2px;padding:0 1px}.days{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:3px}.day{min-height:52px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;padding:4px 0;font-size:11px}.day.in{border-color:#B9CBF0;background:var(--accent-bg);color:var(--accent-strong)}.bar{width:10px;border-radius:2px;background:#C9CED6}.day.in .bar{background:var(--accent)}.seg{display:inline-flex;border:1px solid #D5D9E0;border-radius:6px;overflow:hidden}.seg span{min-height:30px;padding:0 10px;display:flex;align-items:center;border-right:1px solid #D5D9E0;background:#fff}.seg span:last-child{border-right:none}.seg span.on{background:var(--accent-bg);color:var(--accent-strong);font-weight:600}</style></head>
+<body><div class="shell">
+<nav class="nav" aria-label="导航">
+  <div class="brand"><span class="logo">拾</span>拾闻</div>
+  <div class="nav-links">
+    <a href="01-today.html"><span>今日</span><span>9 未读</span></a>
+    <a class="on" href="02-all.html"><span>全部</span></a>
+    <a href="03-favorites.html"><span>收藏</span><span>32</span></a>
+    <a href="04-topics.html"><span>主题</span><span>3</span></a>
+    <a href="05-updates.html"><span>更新与记录</span></a>
+  </div>
+  <a class="status" href="05-updates.html"><b><span class="dot"></span>今天 08:12 已更新</b><span>Claude · 每天 08:00</span></a>
+</nav>
+<main class="main">
+  <div class="head"><h1>全部</h1><span class="muted">从 10 月 1 日开始，共 [N] 条</span><div class="tools"><button class="btn">↻ 刷新</button></div></div>
+
+  <div class="card pad" role="search" style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+      <label class="sr" for="s">搜索</label><input id="s" class="input" value="定时" style="flex:1 1 240px;border-color:var(--accent)">
+      <span class="seg"><span>今天</span><span class="on">近 7 天</span><span>近 30 天</span><span>自定义</span></span>
+      <select class="input"><option>全部主题</option></select>
+      <select class="input"><option>全部状态</option><option>未读</option><option>收藏</option><option>已忽略</option></select>
+      <select class="input"><option>最新在前</option><option>最早在前</option></select>
+    </div>
+    <div class="days" aria-label="最近 14 天">
+      <span class="day">10/24<span class="bar" style="height:18px"></span>11</span><span class="day">10/25<span class="bar" style="height:14px"></span>9</span><span class="day">10/26<span class="bar" style="height:19px"></span>12</span><span class="day">10/27<span class="bar" style="height:13px"></span>8</span><span class="day">10/28<span class="bar" style="height:16px"></span>10</span><span class="day">10/29<span class="bar" style="height:21px"></span>13</span><span class="day">10/30<span class="bar" style="height:11px"></span>7</span>
+      <span class="day in">10/31<span class="bar" style="height:19px"></span>12</span><span class="day in">11/1<span class="bar" style="height:14px"></span>9</span><span class="day in">11/2<span class="bar" style="height:19px"></span>12</span><span class="day in">11/3<span class="bar" style="height:21px"></span>13</span><span class="day in">11/4<span class="bar" style="height:14px"></span>9</span><span class="day in">11/5<span class="bar" style="height:21px"></span>13</span><span class="day in">11/6<span class="bar" style="height:22px"></span>14</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center" class="small">
+      <span class="muted">当前筛选</span><span class="tag" style="font-size:12px">"定时" ×</span><span class="tag" style="font-size:12px">10/31 – 11/6 ×</span><button class="btn link">清除全部</button><span class="muted" style="margin-left:auto">找到 4 条</span>
+    </div>
+    <p class="annot" style="margin:0">日期条：每格一天，柱高是条数；点一格只看那天，再点取消。每次最多加载 50 条，滚到底再加载。</p>
+  </div>
+
+  <section class="card" style="overflow:hidden">
+    <div class="group-head"><strong>11月6日 星期五</strong><span>1 条</span></div>
+    <div class="row"><div class="thumb s img-ph" style="background:#DCE6F7"></div><div class="body"><span class="title">一款桌面 agent 加入<mark>定时</mark>任务，可以每天固定时间自动运行</span><span class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">用户可以给常用任务设一个运行时间，结果保存在本机文件夹…</span></div><span class="tag">AI 工具动态</span><span class="small muted" style="width:110px;text-align:right">科技媒体 · 08:02</span><span style="width:14px"></span></div>
+    <div class="group-head"><strong>11月4日 星期三</strong><span>2 条</span></div>
+    <div class="row"><div class="thumb s">个</div><div class="body"><span class="title">把 agent 当员工用：每天早上的<mark>定时</mark>简报流程</span><span class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">作者分享了用定时任务生成简报的做法，以及主题怎么写… · 备注：可以参考它的主题写法</span></div><span class="tag">AI 工具动态</span><span class="small muted" style="width:110px;text-align:right">个人博客 · 21:40</span><span style="width:14px;color:var(--star)">★</span></div>
+    <div class="row"><div class="thumb s img-ph" style="background:#E3EEE6"></div><div class="body"><span class="title">办公软件新增<mark>定时</mark>提醒和周期任务</span><span class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">新版本支持按周、按月重复的任务和提醒…</span></div><span class="tag">AI 工具动态</span><span class="small muted" style="width:110px;text-align:right">科技媒体 · 10:15</span><span style="width:14px"></span></div>
+    <div class="group-head"><strong>11月1日 星期六</strong><span>1 条</span></div>
+    <div class="row"><div class="thumb s img-ph" style="background:#E6E2F1"></div><div class="body"><span class="title">几款 AI 助手的<mark>定时</mark>任务功能对比</span><span class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">从设置方式、运行限制和结果通知三方面做了比较…</span></div><span class="tag">AI 工具动态</span><span class="small muted" style="width:110px;text-align:right">开发者社区 · 15:05</span><span style="width:14px;color:var(--star)">★</span></div>
+  </section>
+</main>
+</div></body></html>

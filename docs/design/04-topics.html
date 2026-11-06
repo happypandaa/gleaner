@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>04 主题</title><link rel="stylesheet" href="style.css">
+<style>.tlist{flex:1 1 240px;overflow:hidden}.titem{padding:8px 12px;border-bottom:1px solid var(--line-soft);display:flex;flex-direction:column;gap:1px}.titem.on{background:var(--accent-bg)}.form{flex:999 1 420px;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:10px}.two{display:flex;flex-wrap:wrap;gap:10px}.two>.field{flex:1 1 200px}</style></head>
+<body><div class="shell">
+<nav class="nav" aria-label="导航">
+  <div class="brand"><span class="logo">拾</span>拾闻</div>
+  <div class="nav-links">
+    <a href="01-today.html"><span>今日</span><span>9 未读</span></a>
+    <a href="02-all.html"><span>全部</span></a>
+    <a href="03-favorites.html"><span>收藏</span><span>32</span></a>
+    <a class="on" href="04-topics.html"><span>主题</span><span>3</span></a>
+    <a href="05-updates.html"><span>更新与记录</span></a>
+  </div>
+  <a class="status" href="05-updates.html"><b><span class="dot"></span>今天 08:12 已更新</b><span>Claude · 每天 08:00</span></a>
+</nav>
+<main class="main">
+  <div class="head"><div><h1>主题</h1><span class="muted">告诉 AI 你关心什么。每次更新前，AI 会先读这里的设置和你的反馈。</span></div><div class="tools"><button class="btn primary">添加主题</button></div></div>
+  <div class="split">
+    <div class="card tlist" role="list">
+      <div class="titem" role="listitem"><div style="display:flex;justify-content:space-between"><strong>AI 工具动态</strong><span class="small" style="color:var(--ok)">开启</span></div><span class="small" style="color:var(--text-3)">桌面 agent、AI 编程工具的新功能和实际用法</span><span class="muted" style="font-size:11px">最近一次 6 条 · 收藏 19 · 列表</span></div>
+      <div class="titem on" role="listitem"><div style="display:flex;justify-content:space-between"><strong style="color:var(--accent-strong)">新能源车价格</strong><span class="small" style="color:var(--ok)">开启</span></div><span class="small" style="color:var(--text-3)">[你的预算] 价位的车型降价和优惠</span><span class="muted" style="font-size:11px">最近一次 5 条 · 收藏 9 · 列表</span></div>
+      <div class="titem" role="listitem"><div style="display:flex;justify-content:space-between"><strong>城市出行</strong><span class="small muted">已暂停</span></div><span class="small" style="color:var(--text-3)">[你的城市] 的地铁、公交和道路变化</span><span class="muted" style="font-size:11px">最近一次 3 条 · 收藏 4 · 列表</span></div>
+    </div>
+    <form class="card form" aria-label="编辑主题">
+      <div class="two">
+        <div class="field" style="flex:2 1 220px"><label for="n">主题名称</label><input id="n" class="input" value="新能源车价格"></div>
+        <div class="field" style="flex:1 1 120px"><label for="m">每次最多</label><select id="m" class="input"><option>6 条</option><option>3 条</option><option>10 条</option></select></div>
+      </div>
+      <div class="field"><label for="d">我关心什么</label><textarea id="d" class="input" rows="3">[你的预算] 左右的纯电和插混车型，主要看降价、限时优惠和新车上市价格。只关心 [你的城市] 能买到的。</textarea><span class="small muted">用平常说话的方式写就行。</span></div>
+      <div class="field"><span class="label">关键词</span><div class="chips"><span class="tag" style="font-size:12px">降价</span><span class="tag" style="font-size:12px">限时优惠</span><span class="tag" style="font-size:12px">上市价</span><button type="button" class="btn link small">添加</button></div></div>
+      <div class="two">
+        <div class="field"><label for="s">优先的来源</label><input id="s" class="input" value="汽车资讯网站、品牌官方"></div>
+        <div class="field"><label for="x">不要的内容</label><input id="x" class="input" value="销量榜、融资新闻"></div>
+      </div>
+      <div class="field"><label for="e">额外记录</label><input id="e" class="input" value="车型、现价、降价金额、优惠截止日期"><span class="small muted">想让 AI 每条都记下的信息，用顿号分开。会显示成标签，比如"现价 · 降价 · 截止"。</span></div>
+      <div class="field"><label for="v">展示方式</label><select id="v" class="input" style="max-width:240px"><option>列表（默认）</option></select><span class="small muted">想换个样子？用「按你的想法改」告诉 AI，比如"车价主题做成对比表"，新的方式会出现在这里。</span></div>
+      <section style="border-radius:6px;background:#F7F8FA;border:1px solid var(--line);padding:8px 10px;display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;justify-content:space-between"><strong>AI 从你的反馈里学到的</strong><span class="small muted">AI 写入，可删除</span></div>
+        <div style="display:flex;justify-content:space-between;gap:8px"><span>常收藏：同级车型的价格对比</span><button type="button" class="btn link small">删除</button></div>
+        <div style="display:flex;justify-content:space-between;gap:8px"><span>常标记不感兴趣：销量排行（3 次）</span><button type="button" class="btn link small">删除</button></div>
+      </section>
+      <div style="display:flex;flex-wrap:wrap;gap:6px"><button type="button" class="btn danger">删除主题</button><button type="button" class="btn" style="margin-left:auto">暂停</button><button type="submit" class="btn primary">保存</button></div>
+      <p class="annot" style="margin:0">删除主题需确认："这个主题的历史内容会保留"。没有任何主题时，页面显示"用示例主题开始"（一键创建"AI 工具动态"）。</p>
+    </form>
+  </div>
+</main>
+</div></body></html>

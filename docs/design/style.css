@@ -1,0 +1,67 @@
+/* 拾闻界面草图公用样式：只用于草图，不是应用代码 */
+:root{--bg:#F4F5F7;--surface:#FFFFFF;--line:#E4E6EA;--line-soft:#EEF0F3;--text:#1D2129;--text-2:#2E3440;--text-3:#3A4150;--muted:#5E6573;--accent:#2B59C3;--accent-strong:#1E428F;--accent-bg:#EAF0FC;--star:#9A4A07;--star-bg:#FFF4E5;--ok:#1F6B3A;--ok-bg:#E7F5EC;--warn:#8A5300;--warn-bg:#FFF4DE;--bad:#A32D24;--bad-bg:#FDECEA}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:13px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif}
+a{color:var(--accent)}
+.shell{display:flex;flex-wrap:wrap;min-height:100vh}
+.nav{flex:1 1 188px;max-width:100%;background:var(--surface);border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:14px}
+.brand{display:flex;align-items:center;gap:8px;padding:0 6px;font-weight:700;font-size:14px}
+.logo{width:24px;height:24px;border-radius:6px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+.nav-links{display:flex;flex-direction:column;gap:2px}
+.nav-links a{display:flex;justify-content:space-between;min-height:32px;align-items:center;padding:0 10px;border-radius:6px;color:var(--text-3);text-decoration:none}
+.nav-links a.on{background:var(--accent-bg);color:var(--accent-strong);font-weight:600}
+.status{margin-top:auto;padding:8px 10px;border-radius:6px;background:var(--bg);color:var(--muted);font-size:12px;text-decoration:none;display:flex;flex-direction:column;gap:2px}
+.status b{display:flex;align-items:center;gap:6px;color:var(--text);font-weight:400}
+.dot{width:7px;height:7px;border-radius:4px;background:#2E8B57;display:inline-block}
+.dot.warn{background:#D98E04}
+.main{flex:999 1 640px;min-width:0;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.head{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.head h1{margin:0;font-size:17px;line-height:1.3}
+.head .tools{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.pad{padding:10px 12px}
+.btn{min-height:30px;padding:0 10px;border-radius:6px;border:1px solid #D5D9E0;background:#fff;color:var(--text);font:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.star{background:var(--star-bg);border-color:#E9C38F;color:var(--star);font-weight:600}
+.btn.link{border:none;background:none;color:var(--accent);padding:0 4px}
+.btn.danger{border-color:#E8B4B0;color:var(--bad)}
+.input{min-height:30px;padding:0 10px;border:1px solid #D5D9E0;border-radius:6px;font:inherit;background:#fff}
+textarea.input{padding:6px 8px;min-height:auto;resize:vertical;width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:28px;padding:0 10px;border-radius:14px;border:1px solid #D5D9E0;background:#fff;color:var(--text-3);font:inherit;display:inline-flex;align-items:center}
+.chip.on{border-color:var(--accent);background:var(--accent-bg);color:var(--accent-strong);font-weight:600}
+.tag{padding:0 6px;border-radius:8px;background:#EEF1F5;color:var(--text-3);font-size:11px;white-space:nowrap}
+.extra{display:flex;flex-wrap:wrap;gap:4px}
+.extra span{padding:0 6px;border-radius:4px;background:#F1F4F9;border:1px solid #E1E6EF;color:var(--text-2);font-size:11px;white-space:nowrap}
+.extra span b{font-weight:600}
+.group-head{display:flex;justify-content:space-between;padding:6px 12px;background:#F8F9FA;border-bottom:1px solid var(--line-soft);font-size:12px;color:var(--muted)}
+.group-head strong{color:var(--text-3)}
+.row{display:flex;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line-soft)}
+.row.on{background:var(--accent-bg)}
+.row .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.row .title{font-size:13px;line-height:1.4}
+.row .title.unread{font-weight:600}
+.row .meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.unread-dot{width:6px;height:6px;border-radius:3px;background:var(--accent);display:inline-block}
+.thumb{flex:none;width:76px;height:52px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;font-size:16px;background:#EEF0F3}
+.thumb.s{width:56px;height:40px;font-size:13px}
+.img-ph{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;text-align:center}
+.dismissed{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--line-soft);color:var(--muted);font-size:12px}
+.split{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
+.list-col{flex:1 1 400px;min-width:0;overflow:hidden}
+.read-col{flex:999 1 420px;min-width:0;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.hero{height:190px;border-radius:6px}
+.reason{margin:0;padding:6px 10px;border-radius:6px;background:var(--bg);color:var(--text-3);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;color:var(--muted);font-weight:600;background:#F8F9FA;padding:6px 8px;white-space:nowrap}
+td{padding:6px 8px;border-top:1px solid var(--line-soft);vertical-align:top}
+.pill{padding:1px 6px;border-radius:8px;font-size:12px;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.info{background:var(--accent-bg);color:var(--accent-strong)}
+.prompt{margin:0;padding:8px 10px;border-radius:6px;background:var(--bg);font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
+.note{border-left:none;background:#FFFBEA;border:1px dashed #E2C878;border-radius:6px;padding:6px 10px;font-size:12px;color:#5C4A0A}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label,.field .label{font-weight:600}
+.annot{font-size:11px;color:#7A5B00;background:#FFF6D6;border:1px solid #F0DE9C;border-radius:4px;padding:2px 6px}
