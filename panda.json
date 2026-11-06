@@ -1,0 +1,18 @@
+{
+  "manifestVersion": 1,
+  "runtime": "web",
+  "app": {
+    "name": "拾闻",
+    "version": "0.1.0",
+    "description": "你的 AI 去收集，你在这里看：按你写的主题每天整理资讯，收藏和反馈都留在本机，AI 会越来越懂你。"
+  },
+  "web": { "root": "app", "entry": "index.html" },
+  "platform": { "sdkApiVersion": 1 },
+  "agent": { "instructions": "AGENTS.md" },
+  "documentation": {
+    "readme": "README.md",
+    "development": "docs/design.md",
+    "database": "docs/database.md"
+  },
+  "window": { "width": 1180, "height": 800, "rememberSize": true }
+}

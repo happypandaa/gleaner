@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>拾闻 · 你的 AI 去收集，你在这里看</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/_platform/sdk.js"></script>
+  <script type="module" src="/main.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="nav">
+      <a href="#today" class="brand"><span class="logo">拾</span><span>拾闻<small>你的每日关注</small></span></a>
+      <nav class="nav-links" aria-label="主导航">
+        <a href="#today" data-page="today"><span>◷　今日</span><span id="new-count" class="nav-count"></span></a>
+        <a href="#all" data-page="all"><span>▤　全部</span></a>
+        <a href="#favorites" data-page="favorites"><span>☆　收藏</span></a>
+        <span class="nav-divider"></span>
+        <a href="#topics" data-page="topics"><span>◈　主题</span></a>
+        <a href="#updates" data-page="updates"><span>↻　更新与记录</span></a>
+      </nav>
+      <a href="#updates" class="status" id="sidebar-status"><b><span class="dot muted"></span>正在读取…</b><span>内容和反馈都留在本机</span></a>
+    </aside>
+    <main class="main" id="main" aria-busy="true"><div class="empty"><strong>正在打开拾闻…</strong></div></main>
+  </div>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <dialog id="request-dialog" aria-labelledby="request-title"><form method="dialog"><h2 id="request-title">让 AI 深入了解</h2><p class="muted">留下你关心的问题，AI 下次更新时会处理。</p><label class="field">补充说明（选填）<textarea class="input" name="text" rows="3" maxlength="4000" placeholder="比如：和我收藏的方案相比，有什么区别？"></textarea></label><div class="dialog-actions"><button class="btn" value="cancel">取消</button><button class="btn primary" value="submit">留下请求</button></div></form></dialog>
+</body>
+</html>
