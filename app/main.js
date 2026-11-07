@@ -1,12 +1,14 @@
 import * as db from './db.js';
-import { esc, date, day, relative, copy, runStatus, safeLink, empty } from './utils.js';
+import { esc, date, day, relative, copy, lastUpdate, safeLink, empty } from './utils.js';
 import { views, getView } from './views/index.js';
 import { renderSettingsPage } from './settings.js';
 import { cleanupImages } from './cleanup.js';
+import { openGuide } from './guide.js';
 
 const main = document.querySelector('#main');
-const pages = ['today','all','favorites','topics','updates'];
-const state = { page:pages.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'today', filters:{}, selectedId:null, invalidCount:0, newCount:0 };
+const pages = ['today','all','favorites','topics','records'];
+const pageFrom = hash => hash==='updates' ? 'records' : pages.includes(hash) ? hash : 'today';
+const state = { page:pageFrom(location.hash.slice(1)), filters:{}, selectedId:null, invalidCount:0, newCount:0 };
 const app = { db, views, state, context:{}, navigate, refresh:() => render(), notify };
 let rendering = 0, knownItemId = null, initialized = false, toastTimer;
 const drafts = new Map();
@@ -27,11 +29,10 @@ async function persistNotes() {
   }
 }
 async function navigate(page) {
-  if (!pages.includes(page)) page='today';
+  page=pageFrom(page);
   try {await noteSave; await persistNotes();} catch {notify('备注还没保存成功，请稍后重试','bad');return;}
   if (main.dataset.dirty==='true' && !confirm('主题的修改还没有保存，确定离开吗？')) return;
   delete main.dataset.dirty;
-  if(page==='today' && main.querySelector('.connection-success'))state.onboardingDone=true;
   state.page=page;state.selectedId=null;
   if (location.hash!==`#${page}`) history.replaceState(null,'',`#${page}`);
   await render();
@@ -129,7 +130,7 @@ async function contentPage(topics, run) {
   const unread=isToday&&run?(await db.query('SELECT COUNT(*) AS count FROM items WHERE run_id=? AND is_read=0 AND is_dismissed=0',[run.id]))[0].count:0;
   const totalText=`${result.total} 条${isToday?` · ${unread} 未读`:''}`;
   let html=titlebar(isToday?date(new Date(),{weekday:'long',hour:undefined,minute:undefined}):favorites?'收藏':'全部内容',totalText,`${isToday && run?'<button class="btn" data-mark-read>全部标为已读</button>':''}`);
-  if(isToday && run && day(run.finished_at || run.started_at)!==day()) html+=`<div class="notice">今天还没更新，下面是 ${esc(date(run.started_at,{hour:undefined,minute:undefined}))} 的内容。<a href="#updates">查看更新方式 ↗</a></div>`;
+  if(isToday && run && day(run.finished_at || run.started_at)!==day()) html+=`<div class="notice">今天还没更新，下面是 ${esc(date(run.started_at,{hour:undefined,minute:undefined}))} 的内容。<button class="btn link" data-ai-guide="manual">现在更新一次 ↗</button></div>`;
   if(isToday && run?.digest) html+=`<section class="card digest"><span class="digest-label">今日要点</span><p>${esc(run.digest)}</p></section>`;
   html+=`<section class="filter-panel ${isToday?'':'card pad'}"><div class="filter-line"><label class="search"><span aria-hidden="true">⌕</span><input class="input" id="search" type="search" value="${esc(f.search)}" placeholder="${isToday?'搜索今日':favorites?'搜索收藏的标题和备注':'搜索标题、摘要、备注'}" aria-label="${isToday?'搜索今日':'搜索内容'}"></label>
     ${isToday?`<div class="chips"><button class="chip ${f.status==='all'?'on':''}" data-status="all">全部</button><button class="chip ${f.status==='unread'?'on':''}" data-status="unread">未读</button></div>`:`<label class="sr" for="topic-filter">主题</label><select id="topic-filter" class="input"><option value="">全部主题</option>${topics.map(t=>`<option value="${t.id}" ${String(t.id)===String(f.topicId)?'selected':''}>${esc(t.name)}</option>`).join('')}<option value="deleted" ${f.topicId==='deleted'?'selected':''}>已删除的主题</option></select>`}
@@ -141,7 +142,7 @@ async function contentPage(topics, run) {
   </section>`;
   const activeFilters=[f.search&&['search',`搜索：${f.search}`],f.topicId&&['topicId',`主题：${topics.find(t=>String(t.id)===String(f.topicId))?.name || '已删除的主题'}`],f.status!=='all'&&!favorites&&['status',`状态：${{unread:'未读',starred:'收藏',dismissed:'已忽略'}[f.status]}`],f.from&&['range',`${f.from} 至 ${f.to || '现在'}`],f.notesOnly&&['notesOnly','有备注']].filter(Boolean);
   if(activeFilters.length)html+=`<div class="active-filters">${activeFilters.map(([key,label])=>`<button class="filter-tag" data-clear="${key}">${esc(label)} ×</button>`).join('')}<button class="btn link" data-clear="all">清除全部</button><span class="muted small">${result.total} 条结果</span></div>`;
-  if(!result.items.length){const placeholder=`<section class="card">${empty(isToday&&!run?'还没有第一期简报':'这里还没有内容',isToday&&!run?'把更新提示词交给你的 AI，完成后回来刷新。':favorites&&!activeFilters.length?'阅读时点一下收藏，把值得再看的内容留下。':'试试调整搜索词或筛选条件。')}${isToday&&!run?'<div class="empty-action"><a class="btn primary" href="#updates">连接你的 AI</a></div>':''}</section>`;html+=current?`<div class="split">${placeholder}${await reader(current)}</div>`:placeholder;return {html,bind:root=>bindContent(root,result,run)};}
+  if(!result.items.length){const placeholder=`<section class="card">${empty(isToday&&!run?'还没有内容':'这里还没有内容',isToday&&!run?'内容由你的 AI 收集，完成后回到这里刷新。':favorites&&!activeFilters.length?'阅读时点一下收藏，把值得再看的内容留下。':'试试调整搜索词或筛选条件。')}${isToday&&!run?'<div class="empty-action"><button class="btn link" data-ai-guide="start">在 AI 里使用拾闻 →</button></div>':''}</section>`;html+=current?`<div class="split">${placeholder}${await reader(current)}</div>`:placeholder;return {html,bind:root=>bindContent(root,result,run)};}
   const more=result.total>result.items.length?`<div class="load-more"><button class="btn" data-load-more>再加载 50 条</button><span class="muted small">已显示 ${result.items.length} / ${result.total}</span></div>`:'';
   if(favorites&&!state.favoriteList) {
     html+=`<div class="favorites-layout ${current?'with-reader':''}"><section><div class="favorites-grid">${result.items.map(item=>`<button class="favorite-card card" data-open="${item.id}">${thumb(item,false,true)}<div class="favorite-body"><span class="eyebrow">${esc(item.topic_name || '已删除的主题')}</span><strong>${highlight(item.title,f.search)}</strong><span class="muted small">${esc(item.source || '未知来源')} · ${esc(date(item.published_at || item.collected_at,{hour:undefined,minute:undefined}))}</span>${item.note?`<p class="favorite-note">${highlight(item.note,f.search)}</p>`:''}<span class="muted small">★ 收藏于 ${esc(relative(item.starred_at))}</span></div></button>`).join('')}</div>${more}</section>${current?await reader(current):''}</div>`;
@@ -200,14 +201,11 @@ async function render({automatic=false}={}) {
       const count=await db.query('SELECT COUNT(*) AS count FROM items WHERE id > ?',[knownItemId]);state.newCount+=Number(count[0]?.count || 0);
     }
     knownItemId=maxId;
-    const status=runStatus(latest,success);
-    document.querySelector('#sidebar-status').innerHTML=`<b><span class="dot ${esc(status.tone)}"></span>${esc(status.text)}</b><span>${esc(status.detail)}</span>`;
+    const status=lastUpdate(latest,success);
+    document.querySelector('#sidebar-status').innerHTML=`<b><span class="dot ${esc(status.tone)}"></span>${esc(status.text)}</b>${status.detail?`<span>${esc(status.detail)}</span>`:''}`;
     document.querySelectorAll('[data-page]').forEach(a=>{a.classList.toggle('on',a.dataset.page===state.page);if(a.dataset.page===state.page)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
-    const setup=await db.query("SELECT id FROM runs WHERE trigger='setup' AND status IN ('done','partial') LIMIT 1");
-    if(state.onboardingDone===undefined)state.onboardingDone=Boolean(topics.length&&setup.length);
-    if(state.page==='updates')state.invalidCount=(await db.listItems({limit:1})).invalidCount;
-    const page=state.page==='today'&&(!topics.length || !setup.length || !state.onboardingDone)?'onboarding':state.page;
-    const output=['topics','updates','onboarding'].includes(page)?await renderSettingsPage(page,app):await contentPage(topics,success);
+    if(state.page==='records')state.invalidCount=(await db.listItems({limit:1})).invalidCount;
+    const output=['topics','records'].includes(state.page)?await renderSettingsPage(state.page,app):await contentPage(topics,success);
     if(token!==rendering || main.dataset.dirty==='true' || (automatic&&(drafts.size || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))))return;
     main.innerHTML=output.html;output.bind?.(main);
     main.querySelectorAll('[data-refresh]').forEach(el=>el.onclick=()=>action(el,async()=>{await render();notify('已刷新');}));
@@ -231,6 +229,7 @@ async function boot() {
     cleanupImages().catch(error=>console.warn('配图清理暂未完成',error));
   }catch(error){console.error(error);main.innerHTML=`<section class="card">${empty('暂时读不到数据','请稍后重试；已有内容会保留。')}<div class="empty-action"><button id="boot-retry" class="btn primary">重试</button></div></section>`;main.querySelector('#boot-retry').onclick=boot;main.setAttribute('aria-busy','false');}
 }
+document.addEventListener('click',e=>{const guide=e.target.closest('[data-ai-guide]');if(guide){e.preventDefault();openGuide(app,guide.dataset.aiGuide);}});
 document.querySelector('.nav').addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(link){e.preventDefault();navigate(link.hash.slice(1));}});
 main.addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(link){e.preventDefault();navigate(link.hash.slice(1));}});
 window.addEventListener('hashchange',()=>navigate(location.hash.slice(1)));

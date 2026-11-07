@@ -42,8 +42,13 @@ afterEach(() => {
   delete globalThis.window;
 });
 
+// Topics are created by the user's AI in conversation, as AGENTS.md describes.
 async function topic(overrides = {}) {
-  return db.saveTopic({ name: 'AI 工具动态', description: '关注能用上的工具变化', keywords: ['工具'], ...overrides });
+  const now = '2026-11-06T08:00:00.000Z';
+  const values = { name: 'AI 工具动态', description: '关注能用上的工具变化', keywords: '["工具"]', created_at: now, updated_at: now, updated_by: 'agent', ...overrides };
+  const keys = Object.keys(values);
+  const row = (await db.query(`INSERT INTO topics(${keys.join(', ')}) VALUES (${keys.map(() => '?').join(', ')}) RETURNING id`, Object.values(values)))[0];
+  return (await db.topics()).find(entry => entry.id === row.id);
 }
 
 async function run(overrides = {}) {
@@ -62,13 +67,45 @@ test('initialization creates the complete version once and preserves existing co
   await db.init();
   const tables = await db.query("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name");
   assert.deepEqual(tables.map(row => row.name), ['items', 'learned', 'meta', 'requests', 'runs', 'topics']);
-  assert.equal((await db.query("SELECT value FROM meta WHERE key = 'schema_version'"))[0].value, '1');
+  assert.equal((await db.query("SELECT value FROM meta WHERE key = 'schema_version'"))[0].value, '2');
   const saved = await topic();
   await insertItem({ topic_id: saved.id });
   await db.init();
   assert.equal((await db.listItems()).total, 1);
   assert.equal((await db.topics())[0].id, saved.id);
   assert.deepEqual((await db.topics())[0].keywords, ['工具']);
+});
+
+test('version 1 databases upgrade in place and keep their topics as app-edited', async () => {
+  const { migrations } = await import('../app/schema.js');
+  for (const sql of migrations[0].statements) await db.execute(sql);
+  await db.execute("INSERT INTO meta(key, value) VALUES ('schema_version', '1')");
+  await db.execute("INSERT INTO topics(name, description) VALUES ('车价', '关注降价')");
+  await db.init();
+  assert.equal((await db.query("SELECT value FROM meta WHERE key = 'schema_version'"))[0].value, '2');
+  const [kept] = await db.topics();
+  assert.equal(kept.name, '车价');
+  assert.equal(kept.updated_by, 'app');
+  await assert.rejects(db.execute("UPDATE topics SET updated_by = 'someone' WHERE id = ?", [kept.id]), /CHECK/);
+});
+
+test('app edits mark the topic as user-changed and never overwrite a newer AI change', async () => {
+  await db.init();
+  const opened = await topic();
+  const saved = await db.updateTopic(opened.id, { description: '只看能直接上手的工具', enabled: 0 }, opened.updated_at);
+  assert.equal(saved.updated_by, 'app');
+  assert.equal(saved.enabled, 0);
+  assert.equal(saved.name, opened.name);
+  assert.notEqual(saved.updated_at, opened.updated_at);
+  // The AI edits the topic (as the user asked in conversation) while the app still shows the old version.
+  await db.execute("UPDATE topics SET description = 'AI 改过的描述', updated_by = 'agent', updated_at = ? WHERE id = ? AND updated_at = ?",
+    ['2026-11-07T09:00:00.000Z', saved.id, saved.updated_at]);
+  await assert.rejects(db.updateTopic(saved.id, { description: '旧页面里的修改' }, saved.updated_at), error => error.code === 'TOPIC_CHANGED');
+  const current = (await db.topics())[0];
+  assert.equal(current.description, 'AI 改过的描述');
+  assert.equal(current.updated_by, 'agent');
+  await assert.rejects(db.updateTopic(current.id, { max_items: 21 }, current.updated_at), /1 到 20/);
+  await assert.rejects(db.updateTopic(9999, { name: '不存在' }), /不存在/);
 });
 
 test('failed initialization rolls back every schema statement and version marker', async () => {
@@ -80,9 +117,9 @@ test('failed initialization rolls back every schema statement and version marker
 
 test('newer database versions are rejected without changing their data', async () => {
   await db.init();
-  await db.execute("UPDATE meta SET value = '2' WHERE key = 'schema_version'");
+  await db.execute("UPDATE meta SET value = '3' WHERE key = 'schema_version'");
   await assert.rejects(db.init(), /更新版本/);
-  assert.equal((await db.query("SELECT value FROM meta WHERE key = 'schema_version'"))[0].value, '2');
+  assert.equal((await db.query("SELECT value FROM meta WHERE key = 'schema_version'"))[0].value, '3');
 });
 
 test('user changes stay in user columns and duplicate AI inserts preserve them', async () => {
@@ -125,7 +162,8 @@ test('schema checks reject corrupt JSON, invalid importance, invalid reasons and
   await assert.rejects(insertItem({ extra: '{invalid}' }));
   await assert.rejects(insertItem({ importance: 4 }));
   await assert.rejects(insertItem({ dismiss_reason: '自定义非法原因' }));
-  await assert.rejects(topic({ max_items: 21 }), /1 到 20/);
+  await assert.rejects(topic({ max_items: 21 }), /CHECK/);
+  await assert.rejects(topic({ updated_by: 'robot' }), /CHECK/);
   assert.equal((await db.listItems()).total, 0);
 });
 

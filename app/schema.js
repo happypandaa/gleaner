@@ -1,5 +1,5 @@
 // One statement per entry: the platform owns the enclosing transaction.
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const migrations = [{
   version: 1,
@@ -84,5 +84,11 @@ export const migrations = [{
     'CREATE INDEX IF NOT EXISTS items_run_id ON items(run_id)',
     'CREATE INDEX IF NOT EXISTS requests_item_id ON requests(item_id)',
     `CREATE UNIQUE INDEX IF NOT EXISTS requests_one_pending ON requests(item_id, kind) WHERE status = 'pending'`,
+  ],
+}, {
+  // Topics are created by the user's AI in conversation and edited here; record who changed them last.
+  version: 2,
+  statements: [
+    `ALTER TABLE topics ADD COLUMN updated_by TEXT NOT NULL DEFAULT 'app' CHECK (updated_by IN ('app', 'agent'))`,
   ],
 }];

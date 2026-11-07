@@ -23,16 +23,17 @@ export async function copy(text) {
     if (!ok) throw new Error('复制失败，请选中提示词后手动复制');
   }
 }
-export function runStatus(latest, success) {
-  if (!latest) return {text:'还没有连接 AI',tone:'muted',detail:'先写主题，再连接你的 AI'};
+// Describes only what the run records show. The app cannot know whether an AI tool is set up,
+// so it never reports a "connected" state or warns about a missing daily update.
+export function lastUpdate(latest, success) {
+  if (!latest) return {text:'还没有更新记录',tone:'muted',detail:''};
   if (latest.status === 'running') return Date.now()-new Date(latest.started_at).getTime()<3600000
-    ? {text:'AI 正在更新…',tone:'ok',detail:latest.agent || '稍后刷新查看结果'}
-    : {text:'上次更新可能中断了',tone:'warn',detail:'请检查 AI 工具中的任务'};
-  if (latest.status === 'failed') return {text:'上次更新失败',tone:'bad',detail:latest.message || '请检查 AI 工具中的任务'};
+    ? {text:'AI 正在更新…',tone:'info',detail:latest.agent || '完成后刷新查看'}
+    : {text:'上次更新可能中断了',tone:'warn',detail:'可以让 AI 再更新一次'};
+  if (latest.status === 'failed') return {text:'上次更新没有完成',tone:'bad',detail:latest.message || '可以让 AI 再更新一次'};
   const stamp = success?.finished_at || success?.started_at;
-  if (!stamp) return {text:'还没有成功更新',tone:'warn',detail:'请检查 AI 工具中的任务'};
-  if (Date.now()-new Date(stamp).getTime()>26*3600000) return {text:`已经 ${Math.max(1,Math.floor((Date.now()-new Date(stamp).getTime())/86400000))} 天没有更新`,tone:'warn',detail:'请检查 AI 工具里的定时任务'};
-  return {text:`${relative(stamp)} 已更新`,tone:'ok',detail:[success.agent,success.schedule].filter(Boolean).join(' · ') || '内容已保存在本机'};
+  if (!stamp) return {text:'还没有更新记录',tone:'muted',detail:''};
+  return {text:`上次更新：${relative(stamp)}`,tone:'muted',detail:success.agent || ''};
 }
 export function safeLink(value) {
   try {const url=new URL(value); return ['https:','http:'].includes(url.protocol) ? url.href : ''; } catch {return '';}

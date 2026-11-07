@@ -86,9 +86,11 @@ function idValue(value) {
   return id;
 }
 
-export async function saveTopic(input) {
-  const old = input.id ? (await query('SELECT * FROM topics WHERE id = ?', [idValue(input.id)], 1))[0] : null;
-  if (input.id && !old) throw new Error('这个主题已经不存在，请刷新后重试。');
+// Topics are created by the user's AI. The app only edits existing topics, and only when the row
+// is still the version the user opened, so an AI change made meanwhile is never overwritten.
+export async function updateTopic(id, input, expectedUpdatedAt) {
+  const old = (await query('SELECT * FROM topics WHERE id = ?', [idValue(id)], 1))[0];
+  if (!old) throw new Error('这个主题已经不存在，请刷新后重试。');
   const topic = { ...old, ...input };
   const name = String(topic.name || '').trim();
   const description = String(topic.description || '').trim();
@@ -101,17 +103,20 @@ export async function saveTopic(input) {
   }
   if (!Array.isArray(keywords) || keywords.some(value => typeof value !== 'string')) throw new Error('请用文字填写关键词。');
   keywords = [...new Set(keywords.map(value => value.trim()).filter(Boolean))];
-  const now = new Date().toISOString();
-  const fields = ['name', 'description', 'keywords', 'sources', 'excludes', 'extra_fields', 'max_items', 'view', 'enabled', 'sort_order', 'updated_at'];
-  const enabled = topic.enabled === undefined ? 1 : Number(topic.enabled);
+  const enabled = Number(topic.enabled ?? 1);
   if (![0, 1].includes(enabled)) throw new Error('主题状态无效，请刷新后重试。');
-  const sortOrder = Number(topic.sort_order ?? (await query('SELECT COALESCE(MAX(sort_order), -1) + 1 AS value FROM topics', [], 1))[0].value);
+  const sortOrder = Number(topic.sort_order ?? 0);
   if (!Number.isFinite(sortOrder)) throw new Error('主题顺序无效。');
+  const fields = ['name', 'description', 'keywords', 'sources', 'excludes', 'extra_fields', 'max_items', 'view', 'enabled', 'sort_order', 'updated_at', 'updated_by'];
   const values = [name, description, JSON.stringify(keywords), String(topic.sources || ''), String(topic.excludes || ''),
-    String(topic.extra_fields || ''), maxItems, String(topic.view || 'list'), enabled, sortOrder, now];
-  const rows = old
-    ? await query(`UPDATE topics SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ? RETURNING *`, [...values, old.id], 1)
-    : await query(`INSERT INTO topics (${fields.join(', ')}, created_at) VALUES (${fields.map(() => '?').join(', ')}, ?) RETURNING *`, [...values, now], 1);
+    String(topic.extra_fields || ''), maxItems, String(topic.view || 'list'), enabled, sortOrder, new Date().toISOString(), 'app'];
+  const rows = await query(`UPDATE topics SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ? AND updated_at = ? RETURNING *`,
+    [...values, old.id, String(expectedUpdatedAt ?? old.updated_at)], 1);
+  if (!rows.length) {
+    const error = new Error('这个主题刚被你的 AI 修改过。请记下你的修改，刷新后再改。');
+    error.code = 'TOPIC_CHANGED';
+    throw error;
+  }
   return parseTopic(rows[0]);
 }
 

@@ -1,6 +1,6 @@
 # 拾闻数据库约定
 
-数据库为应用根目录的 `data/main.sqlite`，附件根目录为 `data/attachments/`。当前 `schema_version` 是 **1**。建表和升级的可执行定义在 [`app/schema.js`](../app/schema.js)，由 [`app/db.js`](../app/db.js) 在应用首次打开时通过熊猫小抽屉 SDK 原子执行。
+数据库为应用根目录的 `data/main.sqlite`，附件根目录为 `data/attachments/`。当前 `schema_version` 是 **2**。建表和升级的可执行定义在 [`app/schema.js`](../app/schema.js)，由 [`app/db.js`](../app/db.js) 在应用首次打开时通过熊猫小抽屉 SDK 原子执行。
 
 本文是 AI 日常运行时的表结构依据；更新流程和禁止事项见根目录 [`AGENTS.md`](../AGENTS.md)。数据库或表不存在时，先让用户在熊猫小抽屉里打开拾闻，不要自行初始化。
 
@@ -18,11 +18,11 @@
 | 列 | 类型及约束 | 含义 |
 | --- | --- | --- |
 | `key` | TEXT PRIMARY KEY NOT NULL | 当前使用 `schema_version` |
-| `value` | TEXT NOT NULL | 当前版本值为字符串 `1` |
+| `value` | TEXT NOT NULL | 当前版本值为字符串 `2` |
 
 程序按迁移版本顺序执行，成功后在同一事务里更新版本号。读取到高于应用支持的版本时停止初始化并提示更新应用，不能降级、清库或重新建库。
 
-## `topics`：应用写入，AI 只读
+## `topics`：AI 按用户要求建立，双方可改
 
 | 列 | 类型及约束 | 含义 |
 | --- | --- | --- |
@@ -38,7 +38,15 @@
 | `enabled` | INTEGER NOT NULL，默认 1，限 0/1 | 是否开启 |
 | `sort_order` | INTEGER NOT NULL，默认 0 | 显示顺序 |
 | `created_at` | TEXT NOT NULL，默认当前 UTC 时间 | 创建时间 |
-| `updated_at` | TEXT NOT NULL，默认当前 UTC 时间 | 最近修改时间 |
+| `updated_at` | TEXT NOT NULL，默认当前 UTC 时间 | 最近修改时间，同时作为修改时的版本检查 |
+| `updated_by` | TEXT NOT NULL，默认 `app`，限 `app`/`agent` | 最近一次是谁改的：`app` 为用户在拾闻里修改，`agent` 为 AI 按用户在对话中的要求修改（版本 2 新增） |
+
+写入规则：
+
+- **AI** 只在用户于对话中明确要求时新建、修改、暂停或删除主题，日常更新只读。新建时 `created_at` 与 `updated_at` 写同一时间，`updated_by = 'agent'`。
+- **应用** 不新建主题，只修改已有主题的设置、开启状态和顺序，或删除主题；修改时写 `updated_by = 'app'`。
+- 双方修改都带 `WHERE id = ? AND updated_at = ?`。影响行数为 0 表示对方刚改过：应用提示用户刷新后再改，AI 重新读取并和用户确认。任何一方都不覆盖对方较新的修改。
+- 主题内容以表中当前数据为准，AI 不按对话记忆恢复用户删除、暂停或改过的设置。AI 更新时发现 `updated_by = 'app'` 且晚于上一次成功运行，会以新设置为准，清理冲突的 `learned`。
 
 删除主题时只删除主题本身，其内容的 `topic_id` 通过外键 `ON DELETE SET NULL` 置空，历史、收藏、备注仍保留，界面显示“已删除的主题”。主题专属的 `learned` 通过外键级联删除，避免误变成全局偏好。
 
