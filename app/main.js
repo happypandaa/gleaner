@@ -142,7 +142,7 @@ async function contentPage(topics, run) {
   </section>`;
   const activeFilters=[f.search&&['search',`搜索：${f.search}`],f.topicId&&['topicId',`主题：${topics.find(t=>String(t.id)===String(f.topicId))?.name || '已删除的主题'}`],f.status!=='all'&&!favorites&&['status',`状态：${{unread:'未读',starred:'收藏',dismissed:'已忽略'}[f.status]}`],f.from&&['range',`${f.from} 至 ${f.to || '现在'}`],f.notesOnly&&['notesOnly','有备注']].filter(Boolean);
   if(activeFilters.length)html+=`<div class="active-filters">${activeFilters.map(([key,label])=>`<button class="filter-tag" data-clear="${key}">${esc(label)} ×</button>`).join('')}<button class="btn link" data-clear="all">清除全部</button><span class="muted small">${result.total} 条结果</span></div>`;
-  if(!result.items.length){const placeholder=`<section class="card">${empty(isToday&&!run?'还没有内容':'这里还没有内容',isToday&&!run?'拾闻的内容由你的 AI 收集。把下面这句话发给你的 AI，再告诉它你想关注什么。':favorites&&!activeFilters.length?'阅读时点一下收藏，把值得再看的内容留下。':'试试调整搜索词或筛选条件。')}${isToday&&!run?`<div class="start-box"><pre class="prompt">${esc(prompts.start(app))}</pre><div class="guide-actions"><button class="btn primary small" data-copy-start>复制</button><button class="btn link small" data-ai-guide="start">更多说明</button></div></div>`:''}</section>`;html+=current?`<div class="split">${placeholder}${await reader(current)}</div>`:placeholder;return {html,bind:root=>bindContent(root,result,run)};}
+  if(!result.items.length){const placeholder=`<section class="card">${empty(isToday&&!run?'还没有内容':'这里还没有内容',isToday&&!run?'拾闻的内容由你的 AI 收集。把下面这句话发给你的 AI，再告诉它你想关注什么。':favorites&&!activeFilters.length?'阅读时点一下收藏，把值得再看的内容留下。':'试试调整搜索词或筛选条件。')}${isToday&&!run?`<div class="start-box"><pre class="prompt">${esc(prompts.start(app))}</pre><div class="guide-actions">${canOpenAi()?'<button class="btn primary small" data-open-ai-start>交给我的 AI</button><button class="btn small" data-copy-start>复制</button>':'<button class="btn primary small" data-copy-start>复制</button>'}<button class="btn link small" data-ai-guide="start">更多说明</button></div></div>`:''}</section>`;html+=current?`<div class="split">${placeholder}${await reader(current)}</div>`:placeholder;return {html,bind:root=>bindContent(root,result,run)};}
   const more=result.total>result.items.length?`<div class="load-more"><button class="btn" data-load-more>再加载 50 条</button><span class="muted small">已显示 ${result.items.length} / ${result.total}</span></div>`:'';
   if(favorites&&!state.favoriteList) {
     html+=`<div class="favorites-layout ${current?'with-reader':''}"><section><div class="favorites-grid">${result.items.map(item=>`<button class="favorite-card card" data-open="${item.id}">${thumb(item,false,true)}<div class="favorite-body"><span class="eyebrow">${esc(item.topic_name || '已删除的主题')}</span><strong>${highlight(item.title,f.search)}</strong><span class="muted small">${esc(item.source || '未知来源')} · ${esc(date(item.published_at || item.collected_at,{hour:undefined,minute:undefined}))}</span>${item.note?`<p class="favorite-note">${highlight(item.note,f.search)}</p>`:''}<span class="muted small">★ 收藏于 ${esc(relative(item.starred_at))}</span></div></button>`).join('')}</div>${more}</section>${current?await reader(current):''}</div>`;
@@ -222,6 +222,15 @@ async function render({automatic=false}={}) {
     alert.querySelector('button').onclick=()=>render();main.prepend(alert);
   }finally {if(token===rendering)main.setAttribute('aria-busy','false');}
 }
+// The platform opens the user's own AI tool on this folder with the text
+// prefilled; older platforms only support copying.
+function canOpenAi(){return Boolean(window.panda?.ai?.open) && Array.isArray(app.context?.capabilities) && app.context.capabilities.includes('ai.open');}
+function openAi(text){
+  window.panda.ai.open(text).then(()=>notify('已请求打开你的 AI 工具。检查文字后按发送'),error=>{
+    console.error(error);
+    copy(text).then(()=>notify('没能直接打开 AI 工具，文字已复制，请发给你的 AI','bad'),()=>notify(error?.message || '没能打开 AI 工具，请复制文字后发给你的 AI','bad'));
+  });
+}
 // Startup failures are shown as they are. Gleaner does not try to repair data or code itself;
 // the user hands the message to their AI.
 function bootDetail(error) {
@@ -246,6 +255,7 @@ async function boot() {
   }catch(error){console.error(error);showBootError(error);}
 }
 document.addEventListener('click',e=>{const guide=e.target.closest('[data-ai-guide]');if(guide){e.preventDefault();openGuide(app);}
+  if(e.target.closest('[data-open-ai-start]'))openAi(prompts.start(app));
   if(e.target.closest('[data-copy-start]'))copy(prompts.start(app)).then(()=>notify('已复制，请在你的 AI 工具里粘贴发送'),()=>notify('暂时无法复制，请选中文字后手动复制','bad'));});
 document.querySelector('.nav').addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(link){e.preventDefault();navigate(link.hash.slice(1));}});
 main.addEventListener('click',e=>{const link=e.target.closest('a[href^="#"]');if(link){e.preventDefault();navigate(link.hash.slice(1));}});

@@ -7,6 +7,10 @@ function projectPath(app) {
   return typeof app.context?.projectRoot === 'string' ? app.context.projectRoot.trim() : '';
 }
 
+function canOpen(app) {
+  return Boolean(globalThis.panda?.ai?.open) && Array.isArray(app.context?.capabilities) && app.context.capabilities.includes('ai.open');
+}
+
 function folder(app) {
   return projectPath(app) || '拾闻所在的文件夹';
 }
@@ -19,7 +23,7 @@ function block(app, id, title, note, extra = '') {
   return `<section class="guide-section" data-guide-section="${id}">
     <h3>${title}</h3>${extra}
     <pre class="prompt" data-guide-prompt="${id}">${esc(prompts[id](app))}</pre>
-    <div class="guide-actions"><button type="button" class="btn primary small" data-guide-copy="${id}">复制</button>${note ? `<span class="small muted">${note}</span>` : ''}</div>
+    <div class="guide-actions">${canOpen(app) ? `<button type="button" class="btn primary small" data-guide-open="${id}">交给我的 AI</button><button type="button" class="btn small" data-guide-copy="${id}">复制</button>` : `<button type="button" class="btn primary small" data-guide-copy="${id}">复制</button>`}${note ? `<span class="small muted">${note}</span>` : ''}</div>
   </section>`;
 }
 
@@ -49,6 +53,13 @@ export function openGuide(app) {
   };
   dialog.querySelectorAll('[data-guide-copy]').forEach(button => {
     button.addEventListener('click', () => copyText(prompts[button.dataset.guideCopy](app), '已复制，请在你的 AI 工具里粘贴发送'));
+  });
+  dialog.querySelectorAll('[data-guide-open]').forEach(button => {
+    button.addEventListener('click', () => {
+      const text = prompts[button.dataset.guideOpen](app);
+      globalThis.panda.ai.open(text).then(() => { app.notify('已请求打开你的 AI 工具。检查文字后按发送'); dialog.close(); },
+        () => copyText(text, '没能直接打开 AI 工具，文字已复制，请发给你的 AI'));
+    });
   });
   dialog.querySelector('[data-guide-copy-path]')?.addEventListener('click', () => copyText(projectPath(app), '已复制应用文件夹路径'));
   dialog.querySelector('[data-guide-close]').addEventListener('click', () => dialog.close());
