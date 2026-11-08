@@ -118,7 +118,7 @@ test('failed initialization rolls back every schema statement and version marker
 test('newer database versions are rejected without changing their data', async () => {
   await db.init();
   await db.execute("UPDATE meta SET value = '3' WHERE key = 'schema_version'");
-  await assert.rejects(db.init(), /更新版本/);
+  await assert.rejects(db.init(), /表结构版本是 3/);
   assert.equal((await db.query("SELECT value FROM meta WHERE key = 'schema_version'"))[0].value, '3');
 });
 

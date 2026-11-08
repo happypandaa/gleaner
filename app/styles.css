@@ -170,6 +170,9 @@ textarea.input{padding:7px 9px;resize:vertical;width:100%;line-height:1.6}
 .empty strong{color:var(--text-3);font-size:15px}
 .empty p{max-width:340px;line-height:1.7;font-size:12px}
 .empty-symbol{display:grid;place-items:center;width:40px;height:44px;color:#91a8d4;background:#edf2fb;border-radius:9px 9px 9px 2px;font-size:22px;margin-bottom:6px}
+.start-box{display:flex;flex-direction:column;gap:10px;max-width:520px;margin:-20px auto 30px;padding:0 16px}
+.boot-error{display:flex;flex-direction:column;gap:10px}
+.boot-error p{margin:0}
 .empty-action{display:flex;justify-content:center;margin:-25px 0 30px}
 .read-col .empty{min-height:320px;padding:30px 10px}
 .pill{padding:2px 6px;border-radius:4px;font-size:11px;white-space:nowrap}
@@ -195,13 +198,14 @@ dialog .field{margin-top:16px}
 .guide-head h2{margin:0}
 .guide-section{display:flex;flex-direction:column;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)}
 .guide-section h3{font-size:13px;margin:0}
-.guide-section.focus h3{color:var(--accent-strong)}
+.guide-faq dl{margin:0;display:flex;flex-direction:column;gap:4px}
+.guide-faq dt{font-size:12px;font-weight:600;margin-top:6px}
+.guide-faq dd{margin:0;font-size:12px;color:var(--muted)}
 .guide-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .guide-dialog .path-line{margin-top:14px}
 .dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
 .path-line{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;overflow-wrap:anywhere}
 .path-line .small{font-size:11px;min-width:0}
-.time-control{display:flex;align-items:center;gap:8px;font-size:12px}
 .actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .spacer{flex:1}
 .topic-choice{display:flex;flex-direction:column;gap:6px;width:100%;padding:12px;text-align:left;border:0;border-bottom:1px solid var(--line-soft);background:transparent;color:inherit}

@@ -93,9 +93,8 @@
 | `started_at` | TEXT NOT NULL | 开始时间 |
 | `finished_at` | TEXT，可空 | 结束时间 |
 | `agent` | TEXT，可空 | AI 工具名称，例如 `Codex` |
-| `trigger` | TEXT NOT NULL，默认 `manual` | 仅限 `setup`、`scheduled`、`manual` |
+| `trigger` | TEXT NOT NULL，默认 `manual` | 仅限 `setup`（第一次设置试跑）、`manual`（用户叫 AI 更新） |
 | `status` | TEXT NOT NULL，默认 `running` | 仅限 `running`、`done`、`partial`、`failed` |
-| `schedule` | TEXT，可空 | AI 自报的定时安排，没有则留空 |
 | `added` | INTEGER NOT NULL，默认 0，非负 | 真正新增的内容数 |
 | `skipped` | INTEGER NOT NULL，默认 0，非负 | 因链接重复等跳过的条数 |
 | `images_saved` | INTEGER NOT NULL，默认 0，非负 | 本机配图成功数量 |
@@ -103,7 +102,7 @@
 | `digest` | TEXT，可空 | 1–3 句今日要点 |
 | `message` | TEXT，可空 | 给用户看的失败或部分完成说明 |
 
-开始时插入 `running` 并立即提交；结果短事务中一起更新最终状态、结束时间和计数。写入失败先确认回滚，再单独把这条记录标为 `failed`。不要为了显示“成功”而创建虚假定时安排。
+开始时插入 `running` 并立即提交；结果短事务中一起更新最终状态、结束时间和计数。写入失败先确认回滚，再单独把这条记录标为 `failed`。
 
 “今日”显示最近一次 `done` 或 `partial` 的运行内容，按开始时间与 ID 排序。最新一次失败不会覆盖上一次可读简报；更新状态仍根据最新运行显示失败原因。
 

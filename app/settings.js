@@ -1,7 +1,7 @@
 import { esc, date, relative, lastUpdate } from './utils.js';
 
 const RUN_LABELS = { running: '更新中', done: '完成', partial: '部分完成', failed: '未完成' };
-const TRIGGER_LABELS = { setup: '首次', scheduled: '定时', manual: '手动' };
+const TRIGGER_LABELS = { setup: '首次', manual: '手动' };
 const RUN_TONES = { running: 'info', done: 'ok', partial: 'warn', failed: 'bad' };
 
 function rows(result) {
@@ -191,10 +191,10 @@ async function recordsPage(app) {
   const invalid = count(app.state.invalidCount);
   const notice = ['info', 'warn', 'bad'].includes(status.tone) ? `<p class="notice ${status.tone === 'info' ? '' : esc(status.tone)}">${esc(status.text)}${status.detail ? `：${esc(status.detail)}` : ''}</p>` : '';
   return {
-    html: `${pageHeader('记录', 'AI 每次更新都会在这里留下一条记录。', '<button type="button" class="btn link" data-ai-guide="daily">想让 AI 每天自动更新？</button>')}
+    html: `${pageHeader('记录', 'AI 每次更新都会在这里留下一条记录。想看新内容，在和 AI 的对话里说“更新简报”。')}
       ${notice}
       ${invalid ? `<p class="notice warn">有 ${invalid} 条内容格式不对，已跳过。可以让 AI 检查最近写入的内容。</p>` : ''}
-      <section class="card runs-panel">${runs.length ? `<div class="table-wrap"><table><thead><tr><th>时间</th><th>AI 工具</th><th>方式</th><th>结果</th><th>状态</th></tr></thead><tbody>${runs.map(run => `<tr><td>${timeMarkup(run.finished_at || run.started_at)}</td><td>${esc(run.agent || '未注明')}</td><td>${esc(TRIGGER_LABELS[run.trigger] || '未注明')}${run.schedule ? `<p class="small muted">${esc(run.schedule)}</p>` : ''}</td><td><span>新增 ${count(run.added)} 条，跳过重复 ${count(run.skipped)} 条，配图 ${count(run.images_saved)} 张${count(run.images_failed) ? `，${count(run.images_failed)} 张配图下载失败` : ''}</span>${run.message ? `<p class="small muted run-message">${esc(run.message)}</p>` : ''}</td><td><span class="pill ${esc(RUN_TONES[run.status] || 'muted')}">${esc(RUN_LABELS[run.status] || '待确认')}</span></td></tr>`).join('')}</tbody></table></div>${hasMore ? '<div class="pad"><button type="button" class="btn" data-more-runs>再加载 30 条</button></div>' : ''}` : '<div class="empty pad"><strong>还没有记录</strong><p>AI 第一次更新后，记录会出现在这里。</p><button type="button" class="btn link" data-ai-guide="start">在 AI 里使用拾闻 →</button></div>'}</section>`,
+      <section class="card runs-panel">${runs.length ? `<div class="table-wrap"><table><thead><tr><th>时间</th><th>AI 工具</th><th>方式</th><th>结果</th><th>状态</th></tr></thead><tbody>${runs.map(run => `<tr><td>${timeMarkup(run.finished_at || run.started_at)}</td><td>${esc(run.agent || '未注明')}</td><td>${esc(TRIGGER_LABELS[run.trigger] || '未注明')}</td><td><span>新增 ${count(run.added)} 条，跳过重复 ${count(run.skipped)} 条，配图 ${count(run.images_saved)} 张${count(run.images_failed) ? `，${count(run.images_failed)} 张配图下载失败` : ''}</span>${run.message ? `<p class="small muted run-message">${esc(run.message)}</p>` : ''}</td><td><span class="pill ${esc(RUN_TONES[run.status] || 'muted')}">${esc(RUN_LABELS[run.status] || '待确认')}</span></td></tr>`).join('')}</tbody></table></div>${hasMore ? '<div class="pad"><button type="button" class="btn" data-more-runs>再加载 30 条</button></div>' : ''}` : '<div class="empty pad"><strong>还没有记录</strong><p>AI 第一次更新后，记录会出现在这里。</p><button type="button" class="btn link" data-ai-guide="start">在 AI 里使用拾闻 →</button></div>'}</section>`,
     bind(root) {
       bindCommon(root, app);
       root.querySelector('[data-more-runs]')?.addEventListener('click', event => act(app, event.currentTarget, async () => {

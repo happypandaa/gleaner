@@ -23,7 +23,7 @@ export async function init() {
   const rows = hasMeta.length ? await query("SELECT value FROM meta WHERE key = 'schema_version'", [], 1) : [];
   const version = rows.length ? Number(rows[0].value) : 0;
   if (!Number.isInteger(version) || version < 0 || version > SCHEMA_VERSION) {
-    throw new Error('这份数据需要更新版本的拾闻，请先更新应用。');
+    throw new Error(`数据库的表结构版本是 ${rows[0]?.value ?? '未知'}，拾闻程序只支持到 ${SCHEMA_VERSION}。可能是拾闻的代码被改回了旧版本，而数据已经升级过。`);
   }
   for (const migration of migrations) {
     if (migration.version <= version) continue;
