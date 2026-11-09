@@ -226,7 +226,7 @@ async function render({automatic=false}={}) {
 // prefilled; older platforms only support copying.
 function canOpenAi(){return Boolean(window.panda?.ai?.open) && Array.isArray(app.context?.capabilities) && app.context.capabilities.includes('ai.open');}
 function openAi(text){
-  window.panda.ai.open(text).then(()=>notify('已请求打开你的 AI 工具。检查文字后按发送'),error=>{
+  window.panda.ai.open(text).then(()=>notify('已请求打开你的 AI 工具，按它的提示发送'),error=>{
     console.error(error);
     copy(text).then(()=>notify('没能直接打开 AI 工具，文字已复制，请发给你的 AI','bad'),()=>notify(error?.message || '没能打开 AI 工具，请复制文字后发给你的 AI','bad'));
   });

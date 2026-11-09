@@ -57,7 +57,7 @@ export function openGuide(app) {
   dialog.querySelectorAll('[data-guide-open]').forEach(button => {
     button.addEventListener('click', () => {
       const text = prompts[button.dataset.guideOpen](app);
-      globalThis.panda.ai.open(text).then(() => { app.notify('已请求打开你的 AI 工具。检查文字后按发送'); dialog.close(); },
+      globalThis.panda.ai.open(text).then(() => { app.notify('已请求打开你的 AI 工具，按它的提示发送'); dialog.close(); },
         () => copyText(text, '没能直接打开 AI 工具，文字已复制，请发给你的 AI'));
     });
   });
