@@ -5,3 +5,8 @@ node_modules/
 *.log
 .env
 .env.*
+
+.env*
+coverage/
+test-results/
+playwright-report/

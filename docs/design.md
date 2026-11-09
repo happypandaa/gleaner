@@ -8,7 +8,7 @@
 ## 0. 名称
 
 - 中文名：**拾闻**（拾起散落的消息）。英文名 / 文件夹名：**Gleaner**（拾穗的人）。
-- 文件夹已从 `agent-app` 重命名为 `/Users/galen/dev/panda-project/gleaner`。
+- 应用目录名为 `gleaner`，运行路径由平台提供。
 - 名称由 Claude 拟定，用户尚未最终确认。如需改名，只改 `panda.json` 的 `app.name`、界面标题和本文，数据和表结构不受影响。
 
 ## 1. 一句话
@@ -77,7 +77,7 @@ gleaner/                     ← 应用根目录，也是 AI 的工作目录
 
 ## 4. 技术约定
 
-- `runtime: "web"`，**不需要构建步骤**：`app/` 里直接是 HTML、CSS、原生 ES 模块。理由：用户会经常让 AI 改界面，没有构建步骤就不会出现"改了没生效"的问题。不引入前端框架；如确需第三方库，把文件放进 `app/vendor/`，不用 npm。
+- 统一清单 v2，不声明 `backend`，**不需要构建步骤**：`app/` 里直接是 HTML、CSS、原生 ES 模块。理由：用户会经常让 AI 改界面，没有构建步骤就不会出现"改了没生效"的问题。不引入前端框架；如确需第三方库，把文件放进 `app/vendor/`，不用 npm。
 - 通过 `<script src="/_platform/sdk.js"></script>` 使用 `window.panda`：数据库用 `panda.db`，配图用 `panda.files`。
 - 不需要后端、不需要 API Key、不需要声明网络访问（拾闻自己不联网；远程配图走 https，平台安全策略已允许）。
 - `.gitignore` 必须包含 `data/`，用户的简报、配图、数据库永远不进 Git。
@@ -87,8 +87,7 @@ gleaner/                     ← 应用根目录，也是 AI 的工作目录
 
 ```json
 {
-  "manifestVersion": 1,
-  "runtime": "web",
+  "manifestVersion": 2,
   "app": {
     "name": "拾闻",
     "version": "0.1.0",
@@ -397,3 +396,32 @@ AI 开始时单独插入一行 `status = running` 并立即提交，拾闻据此
 
 1. 名称"拾闻 / Gleaner"。
 2. 配图保留规则：收藏的永久保留，其余 180 天后删除配图、保留文字。
+
+
+## 开发与数据检查
+
+## 文件和数据
+
+```text
+panda.json             熊猫小抽屉应用清单
+AGENTS.md              AI 日常更新与写入规则
+app/                   HTML、CSS、原生 ES 模块，无构建步骤
+docs/design.md         产品与实现约定
+docs/database.md       数据表、字段与写入分工
+docs/views.md          扩展主题展示方式
+docs/design/           静态界面草图
+data/main.sqlite       本机数据库（首次打开后创建，不进 Git）
+data/attachments/      本机配图缩略图（不进 Git）
+```
+
+
+AI 开始时单独记录运行状态，在事务外完成搜索、请求处理、下载和缩图，再以一个短事务提交结果，避免影响同时使用的界面。AI 只新增内容，不覆盖用户收藏、忽略和备注。详细约束见 `AGENTS.md` 和 `docs/database.md`。
+
+
+本应用不引入前端框架或构建工具。代码版本不包含 `data/`；Git 不能代替数据备份。
+
+改动数据库相关代码后，可以用带 `node:sqlite` 的 Node.js 运行数据保护检查，它使用独立的内存数据库，不会打开 `data/main.sqlite`：
+
+```sh
+node --test --test-concurrency=1 tests/db.test.mjs
+```

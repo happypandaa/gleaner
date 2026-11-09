@@ -28,13 +28,13 @@
       <div style="display:flex;align-items:center;gap:6px"><strong>每天自动更新</strong><span class="pill info" style="font-size:11px">推荐</span><span class="small" style="margin-left:auto;color:var(--ok)">已设置 · 每天 08:00</span></div>
       <p style="margin:0;color:var(--text-3)">把下面的话粘贴给你的 AI 工具，它会马上更新一次，并建一个每天运行的定时任务。只需设置一次。</p>
       <div style="display:flex;gap:6px;align-items:center"><label class="small" for="t">每天</label><select id="t" class="input"><option>08:00</option><option>07:00</option><option>12:00</option><option>20:00</option></select></div>
-      <pre class="prompt">请在这个文件夹里工作：/Users/galen/dev/panda-project/gleaner。先读其中的 AGENTS.md。然后：1. 马上按 AGENTS.md 更新一次简报，运行记录的 trigger 填 setup；2. 帮我建一个每天 08:00 运行的定时任务，工作目录设为这个文件夹，任务内容是"按 AGENTS.md 更新简报"，并把定时安排写进运行记录的 schedule。如果你不支持定时任务，直接告诉我。</pre>
+      <pre class="prompt">请在这个文件夹里工作：&lt;应用文件夹&gt;。先读其中 AGENTS.md 的「开始使用」，按数据库里的现状继续。如果你读写不了这个文件夹，先告诉我。</pre>
       <div style="display:flex;gap:6px"><button class="btn primary">复制提示词</button><button class="btn">复制文件夹路径</button></div>
     </div>
     <div class="card way">
       <strong>现在手动更新一次</strong>
       <p style="margin:0;color:var(--text-3)">也可以直接在 AI 工具里说"更新简报"。</p>
-      <pre class="prompt">请在 /Users/galen/dev/panda-project/gleaner 里按 AGENTS.md 更新一次简报。</pre>
+      <pre class="prompt">请在 &lt;应用文件夹&gt; 里按 AGENTS.md 更新一次简报。</pre>
       <div style="display:flex;gap:6px"><button class="btn">复制提示词</button></div>
     </div>
   </section>
