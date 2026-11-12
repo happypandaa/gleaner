@@ -1,4 +1,5 @@
 export const esc = (value = '') => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export const icon = name => `<span class="ui-icon-slot"><img class="ui-icon" src="./assets/${name}.svg" alt=""></span>`;
 export function date(value, options = {}) {
   if (!value) return '时间未知';
   const d = new Date(value);

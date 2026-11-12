@@ -1,6 +1,6 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="10.75" height="10.75" viewBox="0 0 10.75 10.75" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="search">
-<path id="Vector" d="M10.6875 6.75C10.6875 8.92462 8.92462 10.6875 6.75 10.6875C4.57538 10.6875 2.8125 8.92462 2.8125 6.75C2.8125 4.57538 4.57538 2.8125 6.75 2.8125C8.92462 2.8125 10.6875 4.57538 10.6875 6.75Z" stroke-width="1.0625" stroke-linecap="round" stroke-linejoin="round" stroke="#687791"/>
-<path id="Vector_2" d="M10 10L12.5 12.5" stroke-width="1.0625" stroke-linecap="round" stroke-linejoin="round" stroke="#687791"/>
+<path id="Vector" d="M8.40625 4.46875C8.40625 6.64337 6.64337 8.40625 4.46875 8.40625C2.29413 8.40625 0.53125 6.64337 0.53125 4.46875C0.53125 2.29413 2.29413 0.53125 4.46875 0.53125C6.64337 0.53125 8.40625 2.29413 8.40625 4.46875Z" stroke-width="1.0625" stroke-linecap="round" stroke-linejoin="round" stroke="#646D79"/>
+<path id="Vector_2" d="M7.71875 7.71875L10.2188 10.2188" stroke-width="1.0625" stroke-linecap="round" stroke-linejoin="round" stroke="#646D79"/>
 </g>
 </svg>

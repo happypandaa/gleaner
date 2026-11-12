@@ -1,5 +1,5 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="12.625" height="11.375" viewBox="0 0 12.625 11.375" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="sparkles">
-<path id="Vector" d="M7.33333 2.33333L8.66667 6L12.3333 7.33333L8.66667 8.66667L7.33333 12.3333L6 8.66667L2.33333 7.33333L6 6L7.33333 2.33333ZM12.3333 8.66667L13 10.3333L14.6667 11L13 11.6667L12.3333 13.3333L11.6667 11.6667L10 11L11.6667 10.3333L12.3333 8.66667Z" stroke-width="1.13333" stroke-linecap="round" stroke-linejoin="round" stroke="#5B6980"/>
+<path id="Vector" d="M5.21875 0.531248L6.46875 3.96875L9.90622 5.21875L6.46875 6.46875L5.21875 9.90622L3.96875 6.46875L0.531248 5.21875L3.96875 3.96875L5.21875 0.531248ZM9.90622 6.46875L10.5313 8.03122L12.0938 8.65625L10.5313 9.28128L9.90622 10.8437L9.28128 9.28128L7.71875 8.65625L9.28128 8.03122L9.90622 6.46875Z" stroke-width="1.0625" stroke-linecap="round" stroke-linejoin="round" stroke="#3C434E"/>
 </g>
 </svg>

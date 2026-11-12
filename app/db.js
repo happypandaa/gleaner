@@ -193,6 +193,13 @@ export async function todayRun() {
   return (await query("SELECT * FROM runs WHERE status IN ('done', 'partial') ORDER BY julianday(started_at) DESC, id DESC LIMIT 1", [], 1))[0] || null;
 }
 
+export async function briefingStats(runId) {
+  return (await query(`SELECT COUNT(*) AS total,
+    COUNT(CASE WHEN i.is_read = 0 AND i.is_dismissed = 0 THEN 1 END) AS unread,
+    COUNT(CASE WHEN i.topic_id IS NULL THEN 1 END) AS deleted
+    FROM items i WHERE i.run_id = ? AND ${validItem}`, [idValue(runId)], 1))[0];
+}
+
 function localDay(value, after = false) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error('请选择有效的日期。');
   const [year, month, day] = value.split('-').map(Number);
