@@ -91,7 +91,8 @@ gleaner/                     ← 应用根目录，也是 AI 的工作目录
   "app": {
     "name": "拾闻",
     "version": "0.1.0",
-    "description": "你的 AI 去收集，你在这里看：按你写的主题每天整理资讯，收藏和反馈都留在本机，AI 会越来越懂你。"
+    "description": "你的 AI 去收集，你在这里看：按你写的主题每天整理资讯，收藏和反馈都留在本机，AI 会越来越懂你。",
+    "icon": "app/assets/app-icon-512.png"
   },
   "web": { "root": "app", "entry": "index.html" },
   "platform": { "sdkApiVersion": 1 },
@@ -404,6 +405,7 @@ AI 开始时单独插入一行 `status = running` 并立即提交，拾闻据此
 panda.json             熊猫小抽屉应用清单
 AGENTS.md              AI 日常更新与写入规则
 app/                   HTML、CSS、原生 ES 模块，无构建步骤
+app/assets/app-icon*    应用图标：app-icon.svg 为源文件，PNG 由它导出（512 用于平台清单，侧边栏用 SVG）
 docs/design.md         产品与实现约定
 docs/database.md       数据表、字段与写入分工
 docs/views.md          扩展主题展示方式

@@ -3,7 +3,8 @@
   "app": {
     "name": "拾闻",
     "version": "0.1.0",
-    "description": "你的 AI 去收集，你在这里看：按你写的主题每天整理资讯，收藏和反馈都留在本机，AI 会越来越懂你。"
+    "description": "你的 AI 去收集，你在这里看：按你写的主题每天整理资讯，收藏和反馈都留在本机，AI 会越来越懂你。",
+    "icon": "app/assets/app-icon-512.png"
   },
   "web": {
     "root": "app",
