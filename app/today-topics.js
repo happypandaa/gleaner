@@ -1,6 +1,6 @@
 import { esc, icon } from './utils.js';
 
-export function renderTodayTopics(topics, selected) {
+export function renderTopicChips(topics, selected, { overflow = true } = {}) {
   const options = [{id:'', name:'全部主题'}, ...topics];
   const button = (option, type) => {
     const id = String(option.id);
@@ -12,7 +12,7 @@ export function renderTodayTopics(topics, selected) {
   };
   return `<div class="today-topics" role="group" aria-label="主题筛选">
     ${options.map(option => button(option, 'chip')).join('')}
-    <button type="button" class="today-topic-more" popovertarget="today-topic-popover" aria-controls="today-topic-popover" aria-expanded="false" hidden>
+    ${overflow ? `<button type="button" class="today-topic-more" popovertarget="today-topic-popover" aria-controls="today-topic-popover" aria-expanded="false" hidden>
       <span>更多 ${topics.length}</span>${icon('topic-more-down')}${icon('topic-more-up')}
     </button>
     <div class="today-topic-popover" id="today-topic-popover" popover="auto" role="region" aria-label="更多主题">
@@ -21,14 +21,23 @@ export function renderTodayTopics(topics, selected) {
         ${options.map(option => button(option, 'option')).join('')}
         <p class="today-topic-empty muted small" hidden>没有匹配的主题</p>
       </div>
-    </div>
+    </div>` : ''}
   </div>`;
 }
 
-export function bindTodayTopics(group, onSelect) {
+export function bindTopicChips(group, onSelect) {
+  const popover = group.querySelector('.today-topic-popover');
+  group.addEventListener('click', async event => {
+    const button = event.target.closest('button[data-topic]');
+    if (!button) return;
+    if (popover?.matches(':popover-open')) popover.hidePopover();
+    await onSelect(button.dataset.topic);
+    document.querySelector('.today-topics .today-topic-chip[aria-pressed="true"]')?.focus({preventScroll:true});
+  });
+  if (!popover) return;
+
   const chips = [...group.querySelectorAll('.today-topic-chip')];
   const more = group.querySelector('.today-topic-more');
-  const popover = group.querySelector('.today-topic-popover');
   const search = popover.querySelector('input');
   const list = popover.querySelector('.today-topic-options');
   const options = [...list.querySelectorAll('.today-topic-option')];
@@ -123,13 +132,6 @@ export function bindTodayTopics(group, onSelect) {
     more.setAttribute('aria-expanded', String(event.newState === 'open'));
   });
   search.addEventListener('input', searchTopics);
-  group.addEventListener('click', async event => {
-    const button = event.target.closest('button[data-topic]');
-    if (!button) return;
-    if (popover.matches(':popover-open')) popover.hidePopover();
-    await onSelect(button.dataset.topic);
-    document.querySelector('.today-topic-chip[aria-pressed="true"]')?.focus({preventScroll:true});
-  });
   let lastWidth;
   const observer = new ResizeObserver(() => {
     if (lastWidth === group.clientWidth) return;

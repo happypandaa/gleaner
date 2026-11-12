@@ -4,7 +4,7 @@ import { views, getView } from './views/index.js';
 import { renderSettingsPage } from './settings.js';
 import { cleanupImages } from './cleanup.js';
 import { openGuide, prompts } from './guide.js';
-import { bindTodayTopics, renderTodayTopics } from './today-topics.js';
+import { bindTopicChips, renderTopicChips } from './today-topics.js';
 
 const main = document.querySelector('#main');
 const pages = ['today','all','favorites','topics','records'];
@@ -53,10 +53,10 @@ function picture(item, className='') {
   if(!item.image_path && !item.image_url) return '';
   return `<img class="${className}" data-image-id="${item.id}" data-image-path="${esc(item.image_path || '')}" data-image-url="${esc(item.image_url || '')}" alt="" hidden>`;
 }
-function thumb(item, small=false, hero=false) {
+function thumb(item, hero=false) {
   const source=String(item.source || '闻');
   const color=['blue','sage','sand','violet'][Math.abs([...source].reduce((s,c)=>s+c.charCodeAt(0),0))%4];
-  return `<div class="${hero?'hero':'thumb'} ${small?'s':''} ${color}" aria-hidden="true"><span>${esc(source.slice(0,1))}</span>${picture(item)}</div>`;
+  return `<div class="${hero?'hero':'thumb'} ${color}" aria-hidden="true"><span>${esc(source.slice(0,1))}</span>${picture(item)}</div>`;
 }
 async function hydrateImages(root) {
   await Promise.all([...root.querySelectorAll('img[data-image-id]')].map(async img=>{
@@ -88,7 +88,7 @@ function row(item, selectedId=state.selectedId) {
   const unread=item.is_read?'':'<i class="unread-dot" aria-hidden="true"></i>';
   const source=esc(item.source || '未知来源');
   const open=`<button class="row ${selected?'on':''}" data-open="${item.id}" aria-pressed="${selected}">`;
-  if(state.page==='today'){
+  if(state.page!=='favorites'){
     const photo=picture(item);
     return `${open}<span class="body"><span class="today-title-line">${unread}${item.is_read?'':'<span class="sr">未读</span>'}${title}</span>
       ${extraTags(item)}<span class="meta">${source}</span></span>
@@ -96,56 +96,68 @@ function row(item, selectedId=state.selectedId) {
       ${item.is_starred?`<span class="today-row-end">${icon('star-fill')}<span class="sr">已收藏</span></span>`:''}</button>`;
   }
   return `${open}
-    ${thumb(item,state.page==='all')}<span class="body">${title}
-    ${state.page==='all'?`<span class="row-summary">${highlight(item.summary,filters().search)}</span>`:''}${extraTags(item)}
+    ${thumb(item)}<span class="body">${title}${extraTags(item)}
     <span class="meta">${unread}<span class="tag">${esc(item.topic_name || '已删除的主题')}</span>${source} · ${esc(relative(item.published_at || item.collected_at))}${item.is_starred?'<span class="star-mark">★</span>':''}</span></span>
   </button>`;
 }
-function groupItems(items, selectedId=state.selectedId) {
+function groupBy(items, keyForItem) {
   const groups=new Map();
-  for(const item of items){const key=state.page==='all'?`${day(item.collected_at)}:${item.topic_id ?? ''}`:String(item.topic_id ?? '');if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item);}
-  return [...groups.values()].map(group=>{
+  for(const item of items){
+    const key=keyForItem(item);
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(item);
+  }
+  return [...groups.values()];
+}
+function groupItems(items, selectedId=state.selectedId) {
+  const renderTopics=entries=>groupBy(entries,item=>item.topic_id ?? null).map(group=>{
     const first=group[0], name=first.topic_name || '已删除的主题';
-    const label=state.page==='all'?`${esc(date(first.collected_at,{hour:undefined,minute:undefined}))} · `:'';
-    const contents=`<div class="group-head"><strong>${label}${esc(name)}</strong><span>${group.length} 条</span></div>${getView(first.topic_view).render(group,{renderRow:item=>row(item,selectedId),esc})}`;
-    return state.page==='today'?`<section class="today-topic-group" aria-label="${esc(name)}">${contents}</section>`:contents;
+    const contents=`<div class="group-head"><strong>${esc(name)}</strong><span>${group.length} 条</span></div>${getView(first.topic_view).render(group,{renderRow:item=>row(item,selectedId),esc})}`;
+    return state.page!=='favorites'?`<section class="today-topic-group" aria-label="${esc(name)}">${contents}</section>`:contents;
+  }).join('');
+  if(state.page!=='all')return renderTopics(items);
+  return groupBy(items,item=>day(item.collected_at)).map(entries=>{
+    const collectedAt=entries[0].collected_at;
+    const heading=esc(date(collectedAt,{hour:undefined,minute:undefined}));
+    return `<section class="all-date-group" aria-label="${heading}"><h2 class="all-date-heading">${heading}</h2>${renderTopics(entries)}</section>`;
   }).join('');
 }
 async function reader(item) {
-  const today=state.page==='today', readerClass=`card read-col${today?' today-reader':''}`;
+  const briefingLayout=state.page!=='favorites', readerClass=`card read-col${briefingLayout?' today-reader':''}`;
   if(!item) return `<article id="reader" class="${readerClass}">${empty('选一条，慢慢看','在左侧选择内容，查看摘要、留下备注。')}</article>`;
   const requests=await db.requests(item.id);
   const url=safeLink(item.url);
   const name=item.topic_name || '已删除的主题';
-  const stamp=today?(item.published_at?date(item.published_at,{hour:undefined,minute:undefined}):''):relative(item.published_at || item.collected_at);
+  const stamp=state.page==='today'?(item.published_at?date(item.published_at,{hour:undefined,minute:undefined}):''):relative(item.published_at || item.collected_at);
   const heading=`<h2>${esc(item.title)}</h2><span class="muted small">${esc(item.source || '未知来源')}${stamp?` · ${esc(stamp)}`:''}</span>`;
   const starLabel=item.is_starred?'已收藏':'收藏';
-  const starButton=today?`<button class="btn ${item.is_starred?'star':''}" data-star="${item.id}" aria-pressed="${Boolean(item.is_starred)}">${icon(item.is_starred?'reader-star-fill':'star-nav')}${starLabel}</button>`:`<button class="btn ${item.is_starred?'star':'primary'}" data-star="${item.id}">${item.is_starred?'★':'☆'} ${starLabel}</button>`;
-  const controls=today?`<div class="today-reader-controls">${starButton}</div>`:'<button class="btn close-reader link" data-close-reader aria-label="关闭阅读面板">关闭 ×</button>';
-  const original=url?`<a class="btn ${today?'primary':''}" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${today?`${icon('external')}打开原文`:'打开原文 ↗'}</a>`:'';
-  const copyLink=`<button class="btn" data-copy-url="${item.id}">${today?icon('copy'):''}复制链接</button>`;
-  const dismiss=`<button class="btn${today?' link':''}" data-dismiss="${item.id}">${item.is_dismissed?'撤销忽略':'不感兴趣'}</button>`;
+  const starButton=briefingLayout?`<button class="btn ${item.is_starred?'star':''}" data-star="${item.id}" aria-pressed="${Boolean(item.is_starred)}">${icon(item.is_starred?'reader-star-fill':'star-nav')}${starLabel}</button>`:`<button class="btn ${item.is_starred?'star':'primary'}" data-star="${item.id}">${item.is_starred?'★':'☆'} ${starLabel}</button>`;
+  const closeReader=state.page==='today'?'':`<button class="btn close-reader${briefingLayout?'':' link'}" data-close-reader aria-label="关闭阅读面板">${briefingLayout?icon('close'):'关闭 ×'}</button>`;
+  const controls=briefingLayout?`<div class="today-reader-controls">${starButton}${closeReader}</div>`:closeReader;
+  const original=url?`<a class="btn ${briefingLayout?'primary':''}" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${briefingLayout?`${icon('external')}打开原文`:'打开原文 ↗'}</a>`:'';
+  const copyLink=`<button class="btn" data-copy-url="${item.id}">${briefingLayout?icon('copy'):''}复制链接</button>`;
+  const dismiss=`<button class="btn${briefingLayout?' link':''}" data-dismiss="${item.id}">${item.is_dismissed?'撤销忽略':'不感兴趣'}</button>`;
   const summary=`<p class="summary">${esc(item.summary)}</p>`;
   const pending=new Set(requests.filter(r=>r.status==='pending').map(r=>r.kind));
-  const research=(kind,label)=>`<button class="btn" data-request="${kind}" ${pending.has(kind)?'disabled':''}>${today&&kind==='deep_dive'?icon('deep-dive'):''}${pending.has(kind)?'已请求 · 等待 AI 处理':label}</button>`;
+  const research=(kind,label)=>`<button class="btn" data-request="${kind}" ${pending.has(kind)?'disabled':''}>${briefingLayout&&kind==='deep_dive'?icon('deep-dive'):''}${pending.has(kind)?'已请求 · 等待 AI 处理':label}</button>`;
   const researchActions=research('deep_dive','让 AI 深入了解')+research('similar','找类似的');
   const results=requests.map(r=>`<div class="request-result"><strong>${r.kind==='deep_dive'?'深入了解':'找类似的'} <span class="pill ${r.status==='failed'?'bad':r.status==='done'?'ok':'info'}">${r.status==='done'?'已完成':r.status==='failed'?'未完成':'等待 AI 处理'}</span></strong><p>${esc(r.result || r.text || 'AI 下次更新时会处理，完成后结果显示在这里。')}</p></div>`).join('');
-  const media=today?picture(item,'today-media-image'):'';
+  const media=briefingLayout?picture(item,'today-media-image'):'';
   const mediaLabel=item.extra?.['配图类型']==='截图'?'原文截图':'原文配图';
-  const actions=today
+  const actions=briefingLayout
     ? `${original}${copyLink}${dismiss}<span class="today-action-divider" aria-hidden="true"></span><div class="today-ai-actions">${researchActions}<small class="muted">下次更新简报时处理</small></div>`
     : `${starButton}${dismiss}${original}${copyLink}`;
   return `<article id="reader" class="${readerClass}" data-reader-item="${item.id}" aria-label="阅读内容">
     <div class="reader-top"><span class="eyebrow">${esc(name)}</span>${controls}</div>
-    ${today?`<div class="today-reader-heading">${heading}</div>`:`${thumb(item,false,true)}${heading}${extraTags(item,99)}`}
-    ${today?`<section class="today-summary"><strong>摘要</strong>${summary}
+    ${briefingLayout?`<div class="today-reader-heading">${heading}</div>`:`${thumb(item,true)}${heading}${extraTags(item,99)}`}
+    ${briefingLayout?`<section class="today-summary"><strong>摘要</strong>${summary}
       ${media?`<figure class="today-media" data-image-container hidden>${media}<figcaption>${mediaLabel}</figcaption></figure>`:''}
     </section>${extraTags(item,99)}`:summary}
-    ${item.reason?`<p class="reason">${today?'<strong>为什么给你</strong>':'为什么给你：'}${esc(item.reason)}</p>`:''}
-    <div class="reader-actions${today?' today-reader-actions':''}">${actions}</div>
+    ${item.reason?`<p class="reason">${briefingLayout?'<strong>为什么给你</strong>':'为什么给你：'}${esc(item.reason)}</p>`:''}
+    <div class="reader-actions${briefingLayout?' today-reader-actions':''}">${actions}</div>
     ${item.is_dismissed?`<div class="dismiss-reasons"><span class="muted small">不感兴趣的原因（选填）</span><div class="chips">${['和主题无关','来源不可靠','内容太旧','重复了'].map(reason=>`<button class="chip ${item.dismiss_reason===reason?'on':''}" data-reason="${esc(reason)}" data-id="${item.id}">${esc(reason)}</button>`).join('')}</div></div>`:''}
-    <label class="field note-field"><span>我的备注 <span class="muted small" id="note-state">${today?'AI 下次更新时会参考':'· AI 下次更新时会看到'}</span></span><textarea class="input" id="item-note" data-id="${item.id}" rows="3" maxlength="10000" placeholder="${today?'记下你的想法…':'写下你的想法，AI 下次收集时会参考'}">${esc(drafts.has(item.id)?drafts.get(item.id):item.note || '')}</textarea></label>
-    ${!today||results?`<section class="request-section" aria-label="AI 请求">${today?'':`<div class="reader-actions">${researchActions}</div>`}${results}</section>`:''}
+    <label class="field note-field"><span>我的备注 <span class="muted small" id="note-state">${briefingLayout?'AI 下次更新时会参考':'· AI 下次更新时会看到'}</span></span><textarea class="input" id="item-note" data-id="${item.id}" rows="3" maxlength="10000" placeholder="${briefingLayout?'记下你的想法…':'写下你的想法，AI 下次收集时会参考'}">${esc(drafts.has(item.id)?drafts.get(item.id):item.note || '')}</textarea></label>
+    ${!briefingLayout||results?`<section class="request-section" aria-label="AI 请求">${briefingLayout?'':`<div class="reader-actions">${researchActions}</div>`}${results}</section>`:''}
   </article>`;
 }
 async function dateBars(f) {
@@ -206,11 +218,12 @@ async function contentPage(topics, run, latest) {
   const stats=isToday&&run?await db.briefingStats(run.id):{total:0,unread:0,deleted:0};
   let html=isToday?todayHeader(run,stats,latest):titlebar(favorites?'收藏':'全部内容',`${result.total} 条`);
   if(!isToday) html+=`<section class="filter-panel card pad"><div class="filter-line">${searchField(f.search,favorites?'搜索收藏的标题和备注':'搜索标题、摘要、备注')}
-    ${topicFilter(topics,f.topicId)}
+    ${favorites?topicFilter(topics,f.topicId):''}
     ${!favorites?`<label class="sr" for="status-filter">状态</label><select id="status-filter" class="input">${[['all','全部状态'],['unread','未读'],['starred','收藏'],['dismissed','已忽略']].map(([v,n])=>`<option value="${v}" ${f.status===v?'selected':''}>${n}</option>`).join('')}</select>`:''}
     ${favorites?`<label class="check"><input id="notes-only" type="checkbox" ${f.notesOnly?'checked':''}>有备注</label><div class="view-switch"><button class="btn ${state.favoriteList?'':'active'}" data-layout="grid" aria-label="卡片视图">▦</button><button class="btn ${state.favoriteList?'active':''}" data-layout="list" aria-label="列表视图">☰</button></div>`:''}
     <label class="sr" for="sort-order">排序</label><select class="input" id="sort-order">${(favorites?[['starred','最近收藏'],['published','发布时间']]:[['newest','最新在前'],['oldest','最早在前']]).map(([v,n])=>`<option value="${v}" ${f.order===v?'selected':''}>${n}</option>`).join('')}</select></div>
-    ${!favorites?`<div class="filter-line date-filters"><span class="muted small">收集日期</span>${[['today','今天'],['7','近 7 天'],['30','近 30 天'],['custom','自定义']].map(([v,n])=>`<button class="chip ${f.range===v?'on':''}" data-range="${v}">${n}</button>`).join('')}${f.range==='custom'?`<input type="date" id="from-date" class="input" value="${esc(f.from)}" aria-label="开始日期"><span class="muted">至</span><input type="date" id="to-date" class="input" value="${esc(f.to)}" aria-label="结束日期">`:''}</div>${await dateBars(f)}`:''}
+    ${!favorites?`${renderTopicChips([...topics,{id:'deleted',name:'已删除的主题'}],f.topicId,{overflow:false})}
+      <div class="filter-line date-filters"><span class="muted small">收集日期</span>${[['today','今天'],['7','近 7 天'],['30','近 30 天'],['custom','自定义']].map(([v,n])=>`<button class="chip ${f.range===v?'on':''}" data-range="${v}">${n}</button>`).join('')}${f.range==='custom'?`<input type="date" id="from-date" class="input" value="${esc(f.from)}" aria-label="开始日期"><span class="muted">至</span><input type="date" id="to-date" class="input" value="${esc(f.to)}" aria-label="结束日期">`:''}</div>${await dateBars(f)}`:''}
   </section>`;
   const activeFilters=[f.search&&['search',`搜索：${f.search}`],f.topicId&&['topicId',`主题：${topics.find(t=>String(t.id)===String(f.topicId))?.name || '已删除的主题'}`],f.status!=='all'&&!favorites&&['status',`状态：${{unread:'未读',starred:'收藏',dismissed:'已忽略'}[f.status]}`],f.from&&['range',`${f.from} 至 ${f.to || '现在'}`],f.notesOnly&&['notesOnly','有备注']].filter(Boolean);
   const filterTags=activeFilters.length?`<div class="active-filters">${activeFilters.map(([key,label])=>`<button class="filter-tag" data-clear="${key}">${esc(label)} ×</button>`).join('')}<button class="btn link" data-clear="all">清除全部</button><span class="muted small">${result.total} 条结果</span></div>`:'';
@@ -223,10 +236,10 @@ async function contentPage(topics, run, latest) {
     return {html,bind};
   }
   const more=result.total>result.items.length?`<div class="load-more"><button class="btn" data-load-more>再加载 50 条</button><span class="muted small">已显示 ${result.items.length} / ${result.total}</span></div>`:'';
-  if(isToday) {
+  if(!favorites && (isToday || result.items.length || current)) {
     const choices=stats.deleted>0||f.topicId==='deleted'?[...topics,{id:'deleted',name:'已删除的主题'}]:topics;
     html+=`<div class="split today-split"><section class="card list-col today-list" aria-label="内容列表">
-      <div class="today-filters">${searchField(f.search,'搜索资讯',true)}${renderTodayTopics(choices,f.topicId)}</div>
+      ${isToday?`<div class="today-filters">${searchField(f.search,'搜索资讯',true)}${renderTopicChips(choices,f.topicId)}</div>`:''}
       <div class="today-list-scroll" tabindex="0" role="region" aria-label="资讯条目">${result.items.length?groupItems(result.items,current?.id):emptyList()}${more}</div>
     </section>${await reader(current)}</div>`;
     return {html,bind};
@@ -237,7 +250,7 @@ async function contentPage(topics, run, latest) {
     return {html,bind};
   }
   if(favorites&&!state.favoriteList) {
-    html+=`<div class="favorites-layout ${current?'with-reader':''}"><section><div class="favorites-grid">${result.items.map(item=>`<button class="favorite-card card" data-open="${item.id}">${thumb(item,false,true)}<div class="favorite-body"><span class="eyebrow">${esc(item.topic_name || '已删除的主题')}</span><strong>${highlight(item.title,f.search)}</strong><span class="muted small">${esc(item.source || '未知来源')} · ${esc(date(item.published_at || item.collected_at,{hour:undefined,minute:undefined}))}</span>${item.note?`<p class="favorite-note">${highlight(item.note,f.search)}</p>`:''}<span class="muted small">★ 收藏于 ${esc(relative(item.starred_at))}</span></div></button>`).join('')}</div>${more}</section>${current?await reader(current):''}</div>`;
+    html+=`<div class="favorites-layout ${current?'with-reader':''}"><section><div class="favorites-grid">${result.items.map(item=>`<button class="favorite-card card" data-open="${item.id}">${thumb(item,true)}<div class="favorite-body"><span class="eyebrow">${esc(item.topic_name || '已删除的主题')}</span><strong>${highlight(item.title,f.search)}</strong><span class="muted small">${esc(item.source || '未知来源')} · ${esc(date(item.published_at || item.collected_at,{hour:undefined,minute:undefined}))}</span>${item.note?`<p class="favorite-note">${highlight(item.note,f.search)}</p>`:''}<span class="muted small">★ 收藏于 ${esc(relative(item.starred_at))}</span></div></button>`).join('')}</div>${more}</section>${current?await reader(current):''}</div>`;
   }else html+=`<div class="split"><section class="card list-col" aria-label="内容列表">${groupItems(result.items)}${more}</section>${await reader(current)}</div>`;
   return {html,bind};
 }
@@ -275,7 +288,7 @@ function bindContent(root,current,run) {
     dialog.onclose=()=>{if(dialog.returnValue==='submit')action(el,async()=>{await db.request(itemId,kind,dialog.querySelector('textarea').value.trim());notify('已记下。下次在 AI 对话里说“更新简报”时，AI 会处理');await render();});};
     dialog.showModal();
   });
-  if(topics)return bindTodayTopics(topics,topicId=>update({topicId}));
+  if(topics)return bindTopicChips(topics,topicId=>update({topicId}));
 }
 async function render({automatic=false,resetListScroll=false}={}) {
   if (!initialized) return;
@@ -303,6 +316,7 @@ async function render({automatic=false,resetListScroll=false}={}) {
     const previousReader=main.querySelector('.today-reader[data-reader-item]');
     const readerScroll=previousReader?.scrollTop ?? 0;
     main.classList.toggle('today-page',state.page==='today');
+    main.classList.toggle('all-page',state.page==='all');
     unbindContent?.();
     main.innerHTML=output.html;
     const dispose=output.bind?.(main);

@@ -75,11 +75,9 @@ textarea.input{padding:7px 9px;resize:vertical;width:100%;line-height:1.6}
 .row .title{font-size:13px;line-height:1.5}
 .row .title.unread{font-weight:600}
 .row .meta{font-size:11px;color:var(--muted);display:flex;align-items:center;flex-wrap:wrap;gap:5px}
-.row-summary{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
 .unread-dot{width:5px;height:5px;border-radius:3px;background:var(--accent);display:inline-block;flex:none}
 .star-mark{color:var(--star);margin-left:auto}
 .thumb{position:relative;overflow:hidden;flex:none;width:76px;height:52px;border-radius:4px;display:grid;place-items:center;font-weight:600;font-size:20px;color:#66788e}
-.thumb.s{width:56px;height:40px;font-size:16px}
 .thumb img,.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .blue{background:#e2eaf5;color:#7a8eaf}
 .sage{background:#e6eee9;color:#7d9989}
@@ -260,8 +258,9 @@ dialog .field{margin-top:16px}
 .main[aria-busy=true]{cursor:progress}
 }
 
-/* Today workbench */
-.shell:has(.today-page) {
+/* Briefing and archive reading */
+.shell:has(.today-page),
+.all-page {
   --bg: #f6f7f9;
   --surface: #fff;
   --line: #e5e7eb;
@@ -274,6 +273,9 @@ dialog .field{margin-top:16px}
   --accent-strong: #1e38ae;
   --accent-bg: #eef0f3;
   --today-soft: #f3f4f6;
+}
+
+.shell:has(.today-page) {
   grid-template-columns: 152px minmax(0, 1fr);
   background: var(--bg);
 }
@@ -309,6 +311,7 @@ dialog .field{margin-top:16px}
 
 .nav-icon,
 .today-page .ui-icon,
+.today-split .ui-icon,
 .shell:has(.today-page) .guide-link .ui-icon {
   display: block;
   flex: none;
@@ -435,34 +438,34 @@ dialog .field{margin-top:16px}
   background: var(--muted);
 }
 
-.today-page .btn:not(.link) {
+:is(.today-page, .today-split) .btn:not(.link) {
   min-height: 34px;
   padding: 5px 10px;
   border-color: var(--line);
   border-radius: 7px;
 }
 
-.today-page .btn:not(.primary):not(.star):not(:disabled):hover {
+:is(.today-page, .today-split) .btn:not(.primary):not(.star):not(:disabled):hover {
   border-color: #cbd0d7;
   background: var(--today-soft);
 }
 
-.today-page .btn.primary {
+:is(.today-page, .today-split) .btn.primary {
   border-color: var(--accent);
 }
 
-.today-page .btn:disabled {
+:is(.today-page, .today-split) .btn:disabled {
   background: var(--today-soft);
   color: var(--muted);
 }
 
-.today-page .today-split {
+.today-split {
   grid-template-columns: minmax(276px, 390fr) minmax(0, 818fr);
   gap: 24px;
   min-width: 0;
 }
 
-.today-page :is(.today-list, .today-reader) {
+:is(.today-list, .today-reader) {
   border-radius: 12px;
 }
 
@@ -552,6 +555,15 @@ dialog .field{margin-top:16px}
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.all-page .today-topic-chip {
+  max-width: 100%;
+  min-height: 28px;
+  height: auto;
+  padding-block: 4px;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .today-topic-more {
@@ -647,6 +659,17 @@ dialog .field{margin-top:16px}
 
 .today-topic-group + .today-topic-group {
   margin-top: 8px;
+}
+
+.all-date-group + .all-date-group {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.all-date-heading {
+  padding: 12px var(--today-list-padding) 9px;
+  font-size: 14px;
+  font-weight: 650;
 }
 
 .today-list .group-head {
@@ -752,11 +775,14 @@ dialog .field{margin-top:16px}
   gap: 8px;
 }
 
+.today-reader {
+  padding: 30px clamp(18px, 2.5vw, 36px);
+  gap: 20px;
+}
+
 .today-page .today-reader {
   position: static;
   max-height: none;
-  padding: 30px clamp(18px, 2.5vw, 36px);
-  gap: 20px;
 }
 
 .today-reader > * {
@@ -977,7 +1003,7 @@ dialog .field{margin-top:16px}
     gap: 16px;
   }
 
-  .today-page .today-split {
+  .today-split {
     grid-template-columns: minmax(244px, 390fr) minmax(0, 818fr);
     gap: 16px;
   }
@@ -986,7 +1012,7 @@ dialog .field{margin-top:16px}
     --today-list-padding: 14px;
   }
 
-  .today-page .today-reader {
+  .today-reader {
     padding: 20px 18px;
     gap: 16px;
   }
@@ -1022,7 +1048,7 @@ dialog .field{margin-top:16px}
     margin-inline: 4px;
   }
 
-  .today-page .today-split {
+  .today-split {
     grid-template-columns: minmax(0, 1fr);
   }
 
