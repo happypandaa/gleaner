@@ -431,6 +431,10 @@ dialog .field{margin-top:16px}
   background: #9b6d22;
 }
 
+.today-update-status .dot.muted {
+  background: var(--muted);
+}
+
 .today-page .btn:not(.link) {
   min-height: 34px;
   padding: 5px 10px;

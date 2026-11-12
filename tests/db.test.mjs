@@ -217,18 +217,35 @@ test('requests deduplicate only while pending and keep prior results', async () 
 test('run state remains visible until an atomic result transaction succeeds', async () => {
   await db.init();
   const first = await run();
+  await insertItem({ run_id: first.id });
   const pending = await run({ started_at: '2026-11-07T08:00:00+08:00', status: 'running' });
-  assert.equal((await db.latestRun()).id, pending.id);
-  assert.equal((await db.todayRun()).id, first.id);
+  const { latest, briefing } = await db.briefingRuns();
+  assert.equal(latest.id, pending.id);
+  assert.equal(briefing.id, first.id);
   await assert.rejects(db.transaction([
     { sql: 'INSERT INTO items(title, url, summary, collected_at, run_id) VALUES (?, ?, ?, ?, ?)', params: ['内容', 'https://example.com/result', '摘要', pending.started_at, pending.id] },
     { sql: "UPDATE runs SET status = 'invalid' WHERE id = ?", params: [pending.id] },
   ]));
-  assert.equal((await db.listItems()).total, 0);
+  assert.equal((await db.listItems()).total, 1);
   assert.equal((await db.latestRun()).status, 'running');
   await db.execute("UPDATE runs SET status = 'failed', message = ? WHERE id = ?", ['写入失败，已回滚。', pending.id]);
   assert.equal((await db.latestRun()).status, 'failed');
-  assert.equal((await db.todayRun()).id, first.id);
+  assert.equal((await db.briefingRuns()).briefing.id, first.id);
+});
+
+test('the displayed briefing survives a completed check without readable content', async () => {
+  await db.init();
+  const first = await run();
+  await insertItem({ run_id: first.id });
+  const emptyCheck = await run({ started_at: '2026-11-07T08:00:00+08:00' });
+  const { latest, briefing } = await db.briefingRuns();
+  assert.equal(latest.id, emptyCheck.id);
+  assert.equal(briefing.id, first.id);
+
+  await insertItem({ run_id: emptyCheck.id, url: 'https://example.com/unreadable', extra: '[]' });
+  assert.equal((await db.briefingRuns()).briefing.id, first.id);
+  await insertItem({ run_id: emptyCheck.id, url: 'https://example.com/readable' });
+  assert.equal((await db.briefingRuns()).briefing.id, emptyCheck.id);
 });
 
 test('marking a run read affects that run only', async () => {

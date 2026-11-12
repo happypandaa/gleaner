@@ -156,24 +156,37 @@ async function dateBars(f) {
 function titlebar(title, description='') {
   return `<header class="head"><div><h1>${esc(title)}</h1>${description?`<span class="muted small">${esc(description)}</span>`:''}</div><div class="tools"><button class="btn" data-refresh aria-label="刷新内容">↻ 刷新</button></div></header>`;
 }
-function todayHeader(run, stats, status) {
-  const stamp=date(run?.finished_at || run?.started_at || new Date(),{hour:undefined,minute:undefined});
+function briefingStatus(latest, run, today) {
+  if (!latest || latest.status === 'running' || latest.status === 'failed') return lastUpdate(latest, latest);
+  const checkedAt = latest.finished_at || latest.started_at;
+  if (day(checkedAt) !== today) return {text:'今天还没更新',tone:'muted'};
+  if (latest.id === run?.id) return null;
+  if (latest.status === 'partial') return {text:'今天更新部分完成',tone:'warn',detail:latest.message};
+  if (latest.message === '还没有开启的主题') return {text:latest.message,tone:'muted'};
+  if (latest.added > 0) return lastUpdate(latest, latest);
+  return {text:`${relative(checkedAt)} 已检查 · 暂无新增`,tone:'ok',detail:latest.message};
+}
+function todayHeader(run, stats, latest) {
+  const today=day();
+  const completedAt=run?.finished_at || run?.started_at;
+  const title=run ? (day(completedAt)===today ? '今日简报' : '最新简报') : '简报';
+  const status=briefingStatus(latest,run,today);
   const reload='重新载入已收录的内容';
-  return `<header class="head today-head"><div class="today-heading"><h1>今日简报</h1><p class="today-date">${esc(stamp)} · ${stats.total} 条 · ${stats.unread} 未读</p></div><div class="tools">
+  return `<header class="head today-head"><div class="today-heading"><h1>${title}</h1>${run?`<p class="today-date"><time datetime="${esc(completedAt)}">${esc(date(completedAt))}</time> 更新 · ${stats.total} 条 · ${stats.unread} 未读</p>`:''}</div><div class="tools">
     ${run?`<button class="btn" data-mark-read ${Number(stats.unread)===0?'disabled':''}>${icon('check')}全部标为已读</button>`:''}
     <div class="today-update">
-      <a class="today-update-status" href="#records"${status.detail?` title="${esc(status.detail)}"`:''}><span class="dot ${esc(status.tone)}" aria-hidden="true"></span>${esc(status.text)}</a>
+      ${status?`<a class="today-update-status" href="#records"${status.detail?` title="${esc(status.detail)}"`:''}><span class="dot ${esc(status.tone)}" aria-hidden="true"></span>${esc(status.text)}</a>`:''}
       <button class="btn" data-refresh aria-label="${reload}" title="${reload}">${icon('refresh')}重新载入</button>
     </div>
   </div></header>`;
 }
 function searchField(value, placeholder, today=false) {
-  return `<label class="search">${today?icon('search'):'<span aria-hidden="true">⌕</span>'}<input class="input" id="search" type="search" value="${esc(value)}" placeholder="${placeholder}" aria-label="${today?'搜索今日':'搜索内容'}"></label>`;
+  return `<label class="search">${today?icon('search'):'<span aria-hidden="true">⌕</span>'}<input class="input" id="search" type="search" value="${esc(value)}" placeholder="${placeholder}" aria-label="${today?'搜索资讯':'搜索内容'}"></label>`;
 }
 function topicFilter(topics, selected) {
   return `<label class="sr" for="topic-filter">主题</label><select id="topic-filter" class="input"><option value="">全部主题</option>${topics.map(t=>`<option value="${t.id}" ${String(t.id)===String(selected)?'selected':''}>${esc(t.name)}</option>`).join('')}<option value="deleted" ${selected==='deleted'?'selected':''}>已删除的主题</option></select>`;
 }
-async function contentPage(topics, run, status) {
+async function contentPage(topics, run, latest) {
   const f=filters(), isToday=state.page==='today', favorites=state.page==='favorites';
   let result={items:[],total:0,invalidCount:0};
   if (!isToday || run) {
@@ -190,7 +203,7 @@ async function contentPage(topics, run, status) {
   const preview=isToday&&window.innerWidth>760?result.items.find(item=>!item.is_dismissed):null;
   const current=isToday&&selected?.run_id!==run?.id?preview:selected || preview;
   const stats=isToday&&run?await db.briefingStats(run.id):{total:0,unread:0,deleted:0};
-  let html=isToday?todayHeader(run,stats,status):titlebar(favorites?'收藏':'全部内容',`${result.total} 条`);
+  let html=isToday?todayHeader(run,stats,latest):titlebar(favorites?'收藏':'全部内容',`${result.total} 条`);
   if(!isToday) html+=`<section class="filter-panel card pad"><div class="filter-line">${searchField(f.search,favorites?'搜索收藏的标题和备注':'搜索标题、摘要、备注')}
     ${topicFilter(topics,f.topicId)}
     ${!favorites?`<label class="sr" for="status-filter">状态</label><select id="status-filter" class="input">${[['all','全部状态'],['unread','未读'],['starred','收藏'],['dismissed','已忽略']].map(([v,n])=>`<option value="${v}" ${f.status===v?'selected':''}>${n}</option>`).join('')}</select>`:''}
@@ -272,18 +285,18 @@ async function render({automatic=false,resetListScroll=false}={}) {
   main.setAttribute('aria-busy','true');
   try {
     await noteSave;await persistNotes();
-    const [topics,latest,success,maxRows]=await Promise.all([db.topics(),db.latestRun(),db.todayRun(),db.query('SELECT MAX(id) AS id FROM items')]);
+    const [topics,{latest,briefing},maxRows]=await Promise.all([db.topics(),db.briefingRuns(),db.query('SELECT MAX(id) AS id FROM items')]);
     if(token!==rendering)return;
     const maxId=Number(maxRows[0]?.id || 0);
     if(knownItemId!==null && maxId>knownItemId && state.page!=='today'){
       const count=await db.query('SELECT COUNT(*) AS count FROM items WHERE id > ?',[knownItemId]);state.newCount+=Number(count[0]?.count || 0);
     }
     knownItemId=maxId;
-    const status=lastUpdate(latest,success);
+    const status=lastUpdate(latest,latest);
     document.querySelector('#sidebar-status').innerHTML=`<b><span class="dot ${esc(status.tone)}"></span>${esc(status.text)}</b>${status.detail?`<span>${esc(status.detail)}</span>`:''}`;
     document.querySelectorAll('[data-page]').forEach(a=>{a.classList.toggle('on',a.dataset.page===state.page);if(a.dataset.page===state.page)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
     if(state.page==='records')state.invalidCount=(await db.listItems({limit:1})).invalidCount;
-    const output=['topics','records'].includes(state.page)?await renderSettingsPage(state.page,app):await contentPage(topics,success,status);
+    const output=['topics','records'].includes(state.page)?await renderSettingsPage(state.page,app):await contentPage(topics,briefing,latest);
     if(token!==rendering || main.dataset.dirty==='true' || (automatic&&(drafts.size || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))))return;
     const listScroll=resetListScroll?0:main.querySelector('.today-list-scroll')?.scrollTop ?? 0;
     const previousReader=main.querySelector('.today-reader[data-reader-item]');

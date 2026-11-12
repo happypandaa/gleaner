@@ -189,8 +189,20 @@ export async function latestRun() {
   return (await runs(1))[0] || null;
 }
 
-export async function todayRun() {
-  return (await query("SELECT * FROM runs WHERE status IN ('done', 'partial') ORDER BY julianday(started_at) DESC, id DESC LIMIT 1", [], 1))[0] || null;
+export async function briefingRuns() {
+  const rows = await query(`WITH latest AS (
+    SELECT * FROM runs ORDER BY julianday(started_at) DESC, id DESC LIMIT 1
+  ), briefing AS (
+    SELECT * FROM runs WHERE status IN ('done', 'partial')
+      AND EXISTS (SELECT 1 FROM items i WHERE i.run_id = runs.id AND ${validItem})
+    ORDER BY julianday(started_at) DESC, id DESC LIMIT 1
+  )
+  SELECT 'latest' AS role, latest.* FROM latest
+  UNION ALL SELECT 'briefing' AS role, briefing.* FROM briefing`, [], 2);
+  return {
+    latest: rows.find(row => row.role === 'latest') ?? null,
+    briefing: rows.find(row => row.role === 'briefing') ?? null,
+  };
 }
 
 export async function briefingStats(runId) {
