@@ -89,7 +89,7 @@ function row(item, selectedId=state.selectedId) {
   const source=esc(item.source || '未知来源');
   const open=`<button class="row ${selected?'on':''}" data-open="${item.id}" aria-pressed="${selected}">`;
   if(state.page==='today'){
-    const photo=['照片','插图'].includes(item.extra?.['配图类型'])?picture(item):'';
+    const photo=picture(item);
     return `${open}<span class="body"><span class="today-title-line">${unread}${item.is_read?'':'<span class="sr">未读</span>'}${title}</span>
       ${extraTags(item)}<span class="meta">${source}</span></span>
       ${photo?`<span class="today-photo" data-image-container hidden>${photo}</span>`:''}
@@ -138,13 +138,14 @@ async function reader(item) {
   return `<article id="reader" class="${readerClass}" data-reader-item="${item.id}" aria-label="阅读内容">
     <div class="reader-top"><span class="eyebrow">${esc(name)}</span>${controls}</div>
     ${today?`<div class="today-reader-heading">${heading}</div>`:`${thumb(item,false,true)}${heading}${extraTags(item,99)}`}
-    ${today?`<section class="today-summary"><strong>摘要</strong>${summary}</section>${extraTags(item,99)}`:summary}
+    ${today?`<section class="today-summary"><strong>摘要</strong>${summary}
+      ${media?`<figure class="today-media" data-image-container hidden>${media}<figcaption>${mediaLabel}</figcaption></figure>`:''}
+    </section>${extraTags(item,99)}`:summary}
     ${item.reason?`<p class="reason">${today?'<strong>为什么给你</strong>':'为什么给你：'}${esc(item.reason)}</p>`:''}
     <div class="reader-actions${today?' today-reader-actions':''}">${actions}</div>
     ${item.is_dismissed?`<div class="dismiss-reasons"><span class="muted small">不感兴趣的原因（选填）</span><div class="chips">${['和主题无关','来源不可靠','内容太旧','重复了'].map(reason=>`<button class="chip ${item.dismiss_reason===reason?'on':''}" data-reason="${esc(reason)}" data-id="${item.id}">${esc(reason)}</button>`).join('')}</div></div>`:''}
     <label class="field note-field"><span>我的备注 <span class="muted small" id="note-state">${today?'AI 下次更新时会参考':'· AI 下次更新时会看到'}</span></span><textarea class="input" id="item-note" data-id="${item.id}" rows="3" maxlength="10000" placeholder="${today?'记下你的想法…':'写下你的想法，AI 下次收集时会参考'}">${esc(drafts.has(item.id)?drafts.get(item.id):item.note || '')}</textarea></label>
     ${!today||results?`<section class="request-section" aria-label="AI 请求">${today?'':`<div class="reader-actions">${researchActions}</div>`}${results}</section>`:''}
-    ${media?`<details class="today-media" data-image-container hidden><summary><span class="today-media-label">${icon('picture')}${mediaLabel}<small class="muted">1 张</small></span><span class="today-media-chevron">${icon('media-chevron')}</span></summary>${media}</details>`:''}
   </article>`;
 }
 async function dateBars(f) {
@@ -301,7 +302,6 @@ async function render({automatic=false,resetListScroll=false}={}) {
     const listScroll=resetListScroll?0:main.querySelector('.today-list-scroll')?.scrollTop ?? 0;
     const previousReader=main.querySelector('.today-reader[data-reader-item]');
     const readerScroll=previousReader?.scrollTop ?? 0;
-    const mediaOpen=previousReader?.querySelector('.today-media')?.open;
     main.classList.toggle('today-page',state.page==='today');
     unbindContent?.();
     main.innerHTML=output.html;
@@ -312,8 +312,6 @@ async function render({automatic=false,resetListScroll=false}={}) {
     const nextReader=main.querySelector('.today-reader[data-reader-item]');
     if(nextReader&&nextReader.dataset.readerItem===previousReader?.dataset.readerItem){
       nextReader.scrollTop=readerScroll;
-      const media=nextReader.querySelector('.today-media');
-      if(media&&mediaOpen)media.open=true;
     }
     main.querySelectorAll('[data-refresh]').forEach(el=>el.onclick=()=>action(el,async()=>{await render();notify(state.page==='today'?'已重新载入':'已刷新');}));
     main.querySelector('[data-retry]')?.addEventListener('click',()=>render());
